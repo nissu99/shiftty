@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
 import { PricePredictor } from "@/components/predict/PricePredictor";
 
 export const metadata: Metadata = {
@@ -8,8 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default async function PredictPage() {
-  const { userId } = await auth();
-
   return (
     <div className="min-h-screen bg-[#050a0e]">
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-16">
@@ -27,11 +24,6 @@ export default async function PredictPage() {
             items, and rooms — to generate a real-time price prediction with
             confidence intervals and optimal package recommendations.
           </p>
-          {userId && (
-            <p className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-4 py-1.5 text-sm text-emerald-400">
-              ✓ Signed in — predictions are saved to your profile
-            </p>
-          )}
         </header>
         <PricePredictor />
       </main>

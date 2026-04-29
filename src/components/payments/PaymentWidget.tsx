@@ -1,446 +1,789 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
-  CheckCircle,
+  AlertCircle,
+  CheckCircle2,
   CreditCard,
   Loader2,
-  MapPin,
-  PartyPopper,
-  Route,
-  Shield,
-  AlertTriangle,
-  Lock,
-  Webhook,
-  Smartphone,
+  RefreshCw,
 } from "lucide-react";
-import dynamic from "next/dynamic";
 
-const ServiceMap = dynamic(
-  () =>
-    import("@/components/map/ServiceMap").then((mod) => ({
-      default: mod.ServiceMap,
-    })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="glass flex h-[400px] items-center justify-center rounded-2xl">
-        <Loader2 className="animate-spin text-emerald-400" size={32} />
-      </div>
-    ),
-  },
-);
-
-async function createPaymentIntent(amount: number) {
-  const response = await fetch("/api/payments/intent", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount }),
-  });
-  if (!response.ok) {
-    throw new Error("Unable to create payment intent");
+declare global {
+  interface Window {
+    Razorpay?: new (options: RazorpayCheckoutOptions) => RazorpayCheckoutInstance;
   }
-  return (await response.json()) as { reference: string; amount: number };
+}
+
+type RazorpayCheckoutOptions = {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description?: string;
+  order_id: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  notes?: Record<string, string>;
+  handler: (response: RazorpayPaymentSuccess) => Promise<void> | void;
+  modal?: {
+    ondismiss?: () => void;
+  };
+  theme?: {
+    color?: string;
+  };
+};
+
+type RazorpayCheckoutInstance = {
+  open: () => void;
+  on: (
+    event: "payment.failed",
+    callback: (response: RazorpayPaymentFailure) => void,
+  ) => void;
+};
+
+type RazorpayPaymentSuccess = {
+  razorpay_payment_id?: string;
+  razorpay_order_id?: string;
+  razorpay_signature?: string;
+};
+
+type RazorpayPaymentFailure = {
+  error?: {
+    description?: string;
+  };
+};
+
+const paymentModes = ["UPI", "CARD", "NET_BANKING"] as const;
+
+type PaymentMode = (typeof paymentModes)[number];
+
+type PaymentBooking = {
+  id: string;
+  source: string;
+  destination: string;
+  status: string;
+  paymentStatus: string;
+  moveDate: string;
+  quote: {
+    basePrice: number;
+    finalPrice: number;
+    discountPercent: number;
+    discountReasons: string[];
+  };
+};
+
+type PaymentIntent = {
+  bookingId?: string;
+  reference: string;
+  amount: number;
+  currency?: string;
+  note?: string;
+  paymentMode?: PaymentMode;
+  provider?: "razorpay" | "mock";
+  keyId?: string;
+  orderId?: string;
+  amountInPaise?: number;
+  metadata?: {
+    type: "booking" | "standalone";
+    source?: string;
+    destination?: string;
+    listingId?: string;
+    listingName?: string;
+  };
+};
+
+type ListingContext = {
+  listingId: string;
+  listingName: string;
+  listingAmount: string;
+  listingSource: string;
+  listingDestination: string;
+};
+
+type MessageState = {
+  variant: "idle" | "success" | "error";
+  text: string;
+};
+
+type RazorpayLoader = {
+  id: string;
+  promise: Promise<boolean>;
+};
+
+let razorpayLoader: RazorpayLoader | null = null;
+
+const RAZORPAY_SDK_SRC = "https://checkout.razorpay.com/v1/checkout.js";
+
+async function ensureRazorpayScriptLoaded(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+  if (window.Razorpay) return true;
+  if (razorpayLoader?.id === RAZORPAY_SDK_SRC) {
+    return razorpayLoader.promise;
+  }
+
+  const promise = new Promise<boolean>((resolve) => {
+    const existing = document.getElementById("razorpay-checkout-script");
+    if (existing) {
+      if (window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const scriptTag = existing as HTMLScriptElement;
+      if (scriptTag.readyState === "loaded" || scriptTag.readyState === "complete") {
+        resolve(Boolean(window.Razorpay));
+        return;
+      }
+      existing.addEventListener("load", () => resolve(true), { once: true });
+      existing.addEventListener("error", () => resolve(false), { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = RAZORPAY_SDK_SRC;
+    script.async = true;
+    script.id = "razorpay-checkout-script";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
+  razorpayLoader = { id: RAZORPAY_SDK_SRC, promise };
+  return promise;
+}
+
+function parseCurrency(value: number) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function parseAmount(value: string | null): string {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return "";
+  return String(Math.max(1500, Math.round(parsed)));
+}
+
+function describeMode(mode: PaymentMode) {
+  if (mode === "UPI") return "UPI / UPI ID";
+  if (mode === "CARD") return "Card / UPI QR";
+  return "Net Banking";
+}
+
+function prettyDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Invalid date";
+  return new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Kolkata",
+  }).format(date);
+}
+
+function safeErrorText(payload: unknown, fallback: string) {
+  if (!payload || typeof payload !== "object") return fallback;
+  const source = payload as { error?: unknown; message?: unknown };
+  if (typeof source.error === "string") return source.error;
+  if (typeof source.message === "string") return source.message;
+  return fallback;
+}
+
+async function readJson(response: Response) {
+  return response.json().catch(() => ({})) as Promise<unknown>;
 }
 
 export function PaymentWidget() {
   const searchParams = useSearchParams();
+  const bookingId = useMemo(() => searchParams.get("bookingId")?.trim() ?? null, [searchParams]);
+  const listingContext = useMemo<ListingContext>(() => {
+    return {
+      listingId: searchParams.get("listingId")?.trim() ?? "",
+      listingName: searchParams.get("listing")?.trim() ?? "",
+      listingAmount: parseAmount(searchParams.get("amount")),
+      listingSource: searchParams.get("pickup")?.trim() ?? "",
+      listingDestination: searchParams.get("dropoff")?.trim() ?? "",
+    };
+  }, [searchParams]);
 
-  const parsedAmount = Number(searchParams.get("amount"));
-  const [amount, setAmount] = useState(() =>
-    Number.isFinite(parsedAmount) && parsedAmount >= 1500 ? parsedAmount : 5000,
+  const hasListingContext = Boolean(
+    listingContext.listingId || listingContext.listingName || listingContext.listingAmount,
   );
-  const listingName = searchParams.get("listing");
-  const pickup = searchParams.get("pickup");
-  const dropoff = searchParams.get("dropoff");
-  const planSummary =
-    pickup || dropoff
-      ? `${pickup ?? "Pickup TBD"} → ${dropoff ?? "Drop-off TBD"}`
-      : null;
+  const defaultMode = (searchParams.get("mode")?.toUpperCase() as PaymentMode | null) ?? "UPI";
+  const normalizedDefaultMode: PaymentMode = paymentModes.includes(defaultMode) ? defaultMode : "UPI";
 
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-  const [message, setMessage] = useState<string | null>(null);
-  const [moveProgress, setMoveProgress] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
-  const [upiId, setUpiId] = useState("");
-  const [upiPopup, setUpiPopup] = useState(false);
+  const [booking, setBooking] = useState<PaymentBooking | null>(null);
+  const [bookingLoading, setBookingLoading] = useState(!!bookingId);
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
-  const showMap = status === "success" && !!pickup && !!dropoff;
+  const [standaloneAmount, setStandaloneAmount] = useState<string>("1500");
+  const [intent, setIntent] = useState<PaymentIntent | null>(null);
+  const [intentLoading, setIntentLoading] = useState(false);
+  const [webhookLoading, setWebhookLoading] = useState<string>("");
+  const [message, setMessage] = useState<MessageState | null>(null);
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>(normalizedDefaultMode);
+  const [sdkLoading, setSdkLoading] = useState(false);
+  const [gatewayLoading, setGatewayLoading] = useState(false);
+  const [gatewayError, setGatewayError] = useState<string | null>(null);
+
+  const boundBookingMode = Boolean(bookingId);
 
   useEffect(() => {
-    if (!showMap) return;
+    if (!boundBookingMode && hasListingContext && listingContext.listingAmount) {
+      setStandaloneAmount(listingContext.listingAmount);
+    }
+    if (!boundBookingMode && hasListingContext && !listingContext.listingAmount) {
+      setStandaloneAmount("1500");
+    }
+  }, [boundBookingMode, hasListingContext, listingContext.listingAmount]);
 
-    const interval = setInterval(() => {
-      setMoveProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 300);
-    return () => clearInterval(interval);
-  }, [showMap]);
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setSdkLoading(true);
+      const ready = await ensureRazorpayScriptLoaded();
+      if (cancelled) return;
+      setSdkLoading(false);
+      setGatewayError(
+        ready ? null : "Unable to load Razorpay checkout. Use mock flow if payment is not enabled.",
+      );
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const handlePay = async () => {
-    if (paymentMethod === "upi" && !/^[\w.-]+@[\w]+$/.test(upiId.trim())) {
-      setStatus("error");
-      setMessage("Enter a valid UPI ID (e.g. name@upi or 9876543210@paytm)");
+  const refreshBooking = async () => {
+    if (!bookingId) {
       return;
     }
 
+    setBookingLoading(true);
+    setBookingError(null);
+
     try {
-      setLoading(true);
-      setMessage(null);
-      setStatus("idle");
-
-      // Show "request sent" popup for UPI
-      if (paymentMethod === "upi") {
-        setUpiPopup(true);
-        await new Promise((r) => setTimeout(r, 2000));
-        setUpiPopup(false);
+      const response = await fetch(`/api/bookings/${bookingId}`);
+      if (!response.ok) {
+        const payload = await readJson(response);
+        setBookingError(safeErrorText(payload, "Unable to load booking."));
+        return;
       }
-
-      const intent = await createPaymentIntent(amount);
-      setStatus("success");
-      const methodLabel =
-        paymentMethod === "upi" ? `UPI (${upiId.trim()})` : "Card";
-      const successMsg = [
-        `₹${amount.toLocaleString("en-IN")} captured via ${methodLabel}${listingName ? ` for ${listingName}` : ""} · ref ${intent.reference}`,
-        planSummary ? `Route: ${planSummary}` : null,
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      setMessage(successMsg);
-    } catch (error) {
-      console.error(error);
-      setStatus("error");
-      setMessage("Payment failed — check gateway configuration.");
+      const payload = (await readJson(response)) as { booking: PaymentBooking };
+      setBooking(payload.booking ?? null);
+    } catch {
+      setBookingError("Unable to load booking details.");
     } finally {
-      setLoading(false);
+      setBookingLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (bookingId) {
+      void refreshBooking();
+    } else {
+      setBookingLoading(false);
+    }
+  }, [bookingId]);
+
+  const createIntent = async () => {
+    setMessage(null);
+    setIntentLoading(true);
+    setIntent(null);
+    setGatewayError(null);
+
+    const body: Record<string, unknown> = {};
+    if (boundBookingMode && bookingId) {
+      body.bookingId = bookingId;
+    } else {
+      body.amount = Number(standaloneAmount);
+      if (hasListingContext) {
+        body.listingId = listingContext.listingId;
+        body.listingName = listingContext.listingName;
+        body.source = listingContext.listingSource;
+        body.destination = listingContext.listingDestination;
+      }
+    }
+    body.paymentMode = paymentMode;
+
+    try {
+      const response = await fetch("/api/payments/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const payload = (await readJson(response)) as PaymentIntent & { error?: string };
+      if (!response.ok) {
+        setIntent(null);
+        if (response.status === 401) {
+          setMessage({
+            variant: "error",
+            text: "Please sign in before creating a payment intent.",
+          });
+          return;
+        }
+
+        if (response.status === 403) {
+          setMessage({
+            variant: "error",
+            text: "You are not authorized to pay for this booking.",
+          });
+          return;
+        }
+
+        setMessage({
+          variant: "error",
+          text: safeErrorText(payload, "Unable to create payment intent."),
+        });
+        return;
+      }
+
+      setIntent(payload);
+      setMessage({
+        variant: "success",
+        text:
+          payload.provider === "razorpay"
+            ? `Payment intent created (${payload.reference}). Click "Pay with Razorpay" to complete.`
+            : `Payment intent created (${payload.reference}). Mock flow enabled for testing.`,
+      });
+    } catch {
+      setIntent(null);
+      setMessage({ variant: "error", text: "Network error while creating payment intent." });
+    } finally {
+      setIntentLoading(false);
+    }
+  };
+
+  const simulateWebhook = async (status: "captured" | "failed" | "refunded") => {
+    if (!intent?.reference) return;
+
+    setWebhookLoading(status);
+    setMessage(null);
+
+    try {
+      const response = await fetch("/api/payments/mock-webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reference: intent.reference,
+          status,
+        }),
+      });
+
+      const payload = (await readJson(response)) as { error?: string; paymentStatus?: string };
+      if (!response.ok || !payload.paymentStatus) {
+        setMessage({ variant: "error", text: safeErrorText(payload, "Webhook simulation failed.") });
+        return;
+      }
+
+      setMessage({
+        variant: "success",
+        text: `Webhook marked payment as ${payload.paymentStatus}. Refresh booking to see status updates.`,
+      });
+    } catch {
+      setMessage({ variant: "error", text: "Webhook simulation failed due to network error." });
+    } finally {
+      setWebhookLoading("");
+      if (boundBookingMode && bookingId) {
+        await refreshBooking();
+      }
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (!intent || intent.provider !== "razorpay" || !intent.orderId || !intent.keyId) {
+      setGatewayError("This intent is not configured for Razorpay checkout.");
+      return;
+    }
+
+    if (!window.Razorpay) {
+      const ready = await ensureRazorpayScriptLoaded();
+      if (!ready || !window.Razorpay) {
+        setGatewayError("Razorpay checkout script failed to load.");
+        setGatewayLoading(false);
+        return;
+      }
+    }
+
+    setGatewayError(null);
+    setGatewayLoading(true);
+    setMessage(null);
+
+    let launched = false;
+
+    try {
+      const amount = intent.amountInPaise ?? Math.round(intent.amount * 100);
+      const razorpay = new window.Razorpay({
+        key: intent.keyId,
+        amount,
+        currency: intent.currency ?? "INR",
+        name: "Shifty",
+        description: intent.metadata?.listingName
+          ? `Shifty payment for ${intent.metadata.listingName}`
+          : "Shifty booking payment",
+        order_id: intent.orderId,
+        notes: {
+          bookingId: intent.bookingId ?? "",
+          reference: intent.reference,
+          paymentMode: intent.paymentMode ?? "UPI",
+        },
+        prefill: {
+          name: "Shifty Customer",
+        },
+        theme: { color: "#10b981" },
+        handler: async (response: RazorpayPaymentSuccess) => {
+          try {
+            const verifyResponse = await fetch("/api/payments/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                bookingId: intent.bookingId,
+                paymentId: response.razorpay_payment_id,
+                orderId: response.razorpay_order_id,
+                signature: response.razorpay_signature,
+                reference: intent.reference,
+              }),
+            });
+
+            const verifyPayload = (await readJson(verifyResponse)) as {
+              ok?: boolean;
+              paymentStatus?: string;
+              error?: string;
+            };
+            if (!verifyResponse.ok || verifyPayload.error) {
+              if (verifyResponse.status === 401) {
+                setMessage({
+                  variant: "error",
+                  text: "Session expired before verification. Please sign in again.",
+                });
+              } else if (verifyResponse.status === 403) {
+                setMessage({
+                  variant: "error",
+                  text: "You are not authorized to complete this payment.",
+                });
+              } else {
+                setMessage({
+                  variant: "error",
+                  text: safeErrorText(
+                    verifyPayload,
+                    "Payment verification failed after checkout.",
+                  ),
+                });
+              }
+              return;
+            }
+
+            setMessage({
+              variant: "success",
+              text: `Payment verified successfully. ${verifyPayload.paymentStatus ? `Status: ${verifyPayload.paymentStatus}.` : ""} Redirect/refresh for latest status.`,
+            });
+
+            if (boundBookingMode && bookingId) {
+              await refreshBooking();
+            }
+          } catch {
+            setMessage({
+              variant: "error",
+              text: "Network error while verifying payment.",
+            });
+          } finally {
+            setGatewayLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setMessage({
+              variant: "error",
+              text: "Payment popup closed before completion.",
+            });
+            setGatewayLoading(false);
+          },
+        },
+      });
+
+      razorpay.on("payment.failed", (response: RazorpayPaymentFailure) => {
+        setGatewayLoading(false);
+        setMessage({
+          variant: "error",
+          text: response.error?.description ?? "Razorpay reported a payment failure.",
+        });
+      });
+
+      launched = true;
+      razorpay.open();
+    } catch {
+      setGatewayError("Unable to initialize Razorpay checkout.");
+      setGatewayLoading(false);
+    } finally {
+      if (!launched) {
+        setGatewayLoading(false);
+      }
+    }
+  };
+
+  const validateStandaloneAmount = () => {
+    const value = Number(standaloneAmount);
+    return Number.isFinite(value) && value >= 1500;
+  };
+
   return (
-    <div className="space-y-6">
-      {/* UPI request sent popup */}
-      {upiPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 flex flex-col items-center gap-4 rounded-3xl border border-emerald-500/20 bg-[#0a1118] p-10 shadow-2xl shadow-emerald-500/10">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/15">
-              <Smartphone size={28} className="text-emerald-400" />
-            </div>
-            <p className="text-lg font-bold text-white">UPI Request Sent</p>
-            <p className="text-sm text-white/50">
-              Approve the payment on your UPI app for{" "}
-              <span className="font-semibold text-emerald-400">{upiId.trim()}</span>
-            </p>
-            <Loader2 size={20} className="animate-spin text-emerald-400" />
-          </div>
-        </div>
-      )}
+    <section className="rounded-3xl border border-white/[0.08] bg-white/[0.03] p-7">
+      <h2 className="text-2xl font-bold text-white">Payment desk</h2>
+      <p className="mt-2 text-sm text-white/50">
+        Launch payment intents from a selected booking or run a standalone transaction for testing.
+      </p>
 
-      {/* ── Main payment card ── */}
-      <section className="glass glow-emerald rounded-2xl p-8">
-        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-white/40">
-              <CreditCard size={16} className="text-emerald-400" />
-              <span className="text-xs font-semibold uppercase tracking-wider">
-                Payment gateway
-              </span>
+      {boundBookingMode && (
+        <>
+          {bookingLoading ? (
+            <div className="mt-6 flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] px-5 py-4 text-sm text-white/50">
+              <Loader2 size={16} className="animate-spin" />
+              Loading booking metadata...
             </div>
-            <h2 className="mt-3 text-2xl font-bold text-white">
-              Collect booking fee securely
-            </h2>
-            <p className="mt-2 max-w-lg text-sm text-white/40">
-              The API mints payment references, stores metadata, and emits
-              signed webhooks. Swap in live keys anytime.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { icon: Shield, label: "PCI-DSS" },
-              { icon: Smartphone, label: "UPI ready" },
-              { icon: Lock, label: "Encrypted" },
-              { icon: Webhook, label: "Webhooks" },
-            ].map((badge) => (
-              <span
-                key={badge.label}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-white/40"
-              >
-                <badge.icon size={12} className="text-emerald-400" />
-                {badge.label}
-              </span>
-            ))}
-          </div>
-        </div>
+          ) : null}
 
-        <div className="mt-8 grid gap-6 md:grid-cols-[300px,1fr]">
-          {/* Left: amount + listing info */}
-          <div className="space-y-4">
-            {listingName && (
-              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400">
-                  Selected listing
+          {bookingError && (
+            <div className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-200">
+              {bookingError}
+            </div>
+          )}
+
+          {booking ? (
+            <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/8 p-4">
+              <p className="text-sm font-semibold text-emerald-100">Booking context</p>
+              <div className="mt-2 text-sm text-white/75">
+                <p>
+                  <span className="text-white/40">ID:</span> {booking.id}
                 </p>
-                <p className="mt-1.5 text-lg font-bold text-white">
-                  {listingName}
+                <p>
+                  <span className="text-white/40">Route:</span> {booking.source} → {booking.destination}
                 </p>
-                {planSummary && (
-                  <p className="mt-1 flex items-center gap-1.5 text-sm text-white/40">
-                    <Route size={12} /> {planSummary}
-                  </p>
-                )}
-                <p className="mt-2 text-[11px] text-white/25">
-                  Amount auto-filled from AI planner
+                <p>
+                  <span className="text-white/40">Move:</span> {prettyDate(booking.moveDate)}
+                </p>
+                <p>
+                  <span className="text-white/40">Booking status:</span> {booking.status}
+                </p>
+                <p>
+                  <span className="text-white/40">Payment state:</span> {booking.paymentStatus}
                 </p>
               </div>
-            )}
+              <div className="mt-3 grid gap-2 text-sm text-white/80 md:grid-cols-3">
+                <span className="rounded-lg bg-white/10 px-3 py-2">Base: {parseCurrency(booking.quote.basePrice)}</span>
+                <span className="rounded-lg bg-white/10 px-3 py-2">Final: {parseCurrency(booking.quote.finalPrice)}</span>
+                <span className="rounded-lg bg-white/10 px-3 py-2">Discount: {booking.quote.discountPercent}%</span>
+              </div>
+              <p className="mt-2 text-xs text-emerald-100">{booking.quote.discountReasons.join(", ")}</p>
+            </div>
+          ) : null}
+        </>
+      )}
 
-            <div className="glass rounded-2xl p-5 space-y-4">
-              <p className="text-sm font-semibold text-white">
-                Booking fee calculator
-              </p>
-              <label className="flex flex-col gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-white/30">
-                  Amount (₹)
-                </span>
+      <div className="mt-7 grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-white/[0.12] bg-white/[0.02] p-5">
+          <h3 className="text-lg font-semibold text-white">Step 1: Create intent</h3>
+          {!boundBookingMode ? (
+            <>
+              <label className="mt-3 block text-sm text-white/70">
+                Amount (₹)
                 <input
                   type="number"
                   min={1500}
-                  step={500}
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
-                  className="h-12 rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 text-lg font-semibold text-white outline-none transition focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20"
+                  step={100}
+                  value={standaloneAmount}
+                  onChange={(event) => setStandaloneAmount(event.target.value)}
+                  className="mt-2 w-full rounded-xl border border-white/[0.1] bg-white/[0.02] px-4 py-3 text-white outline-none"
                 />
               </label>
-              <p className="text-[11px] text-white/25">
-                Split payments between roommates. Escrow available via holding
-                account API.
-              </p>
-            </div>
-          </div>
+              <p className="mt-2 text-xs text-white/40">Minimum amount for standalone flow is ₹1,500.</p>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-white/50">Bound payment flow: amount is derived from booking quote.</p>
+          )}
 
-          {/* Right: method selector + pay button + status */}
-          <div className="flex flex-col gap-5">
-            {/* Payment method tabs */}
-            <div className="flex gap-2 rounded-2xl bg-white/[0.02] p-1.5">
-              {[
-                { id: "upi" as const, icon: Smartphone, label: "UPI" },
-                { id: "card" as const, icon: CreditCard, label: "Card" },
-              ].map((tab) => (
+          <button
+            type="button"
+            onClick={() => void createIntent()}
+            disabled={intentLoading || (!boundBookingMode && !validateStandaloneAmount())}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-white/15"
+          >
+            {intentLoading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
+            {intentLoading ? "Creating intent..." : "Create payment intent"}
+          </button>
+
+          <div className="mt-4">
+            <p className="mb-2 text-sm text-white/70">Payment method</p>
+            <div className="grid grid-cols-3 gap-2">
+              {paymentModes.map((mode) => (
                 <button
-                  key={tab.id}
                   type="button"
-                  onClick={() => setPaymentMethod(tab.id)}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                    paymentMethod === tab.id
-                      ? "bg-emerald-500/15 text-emerald-400 shadow-lg shadow-emerald-500/10"
-                      : "text-white/40 hover:bg-white/[0.04] hover:text-white/60"
+                  key={mode}
+                  onClick={() => setPaymentMode(mode)}
+                  className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${
+                    paymentMode === mode
+                      ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-200"
+                      : "border-white/15 text-white/70 hover:bg-white/10"
                   }`}
                 >
-                  <tab.icon size={16} />
-                  {tab.label}
+                  {mode}
                 </button>
               ))}
             </div>
+            <p className="mt-2 text-xs text-white/45">{describeMode(paymentMode)}</p>
+          </div>
 
-            {/* UPI input */}
-            {paymentMethod === "upi" && (
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-white/30">
-                  UPI ID
+          {intent && (
+            <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/8 p-3 text-sm text-emerald-200">
+              <p>
+                Reference: <span className="font-mono">{intent.reference}</span>
+              </p>
+              {intent.orderId ? (
+                <p>
+                  Gateway order: <span className="font-mono">{intent.orderId}</span>
                 </p>
-                <input
-                  type="text"
-                  value={upiId}
-                  onChange={(e) => setUpiId(e.target.value)}
-                  placeholder="yourname@upi"
-                  className="h-12 w-full rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 text-base text-white placeholder-white/25 outline-none transition focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20"
-                />
-                <div className="flex flex-wrap gap-2">
-                  {["@ybl", "@paytm", "@okaxis", "@ibl"].map((suffix) => (
-                    <button
-                      key={suffix}
-                      type="button"
-                      onClick={() =>
-                        setUpiId((prev) => {
-                          const base = prev.split("@")[0] || "user";
-                          return base + suffix;
-                        })
-                      }
-                      className="rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/40 transition hover:bg-white/[0.06] hover:text-white/60"
-                    >
-                      {suffix}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[11px] text-white/20">
-                  Mock UPI — no real debit will occur. Any valid-format ID works.
+              ) : null}
+              <p>
+                Amount: {parseCurrency(intent.amount)} · Currency: {intent.currency ?? "INR"} · Provider:{" "}
+                {intent.provider ?? "mock"}
+              </p>
+              {intent.note ? <p>Note: {intent.note}</p> : null}
+              <p className="mt-1">Booking: {intent.bookingId ?? "Standalone"}</p>
+              {intent.metadata ? (
+                <p className="mt-1">
+                  Context: {intent.metadata.type}
+                  {intent.metadata.listingName ? ` · ${intent.metadata.listingName}` : ""}
                 </p>
-              </div>
-            )}
+              ) : null}
+            </div>
+          )}
+        </div>
 
-            {/* Card placeholder */}
-            {paymentMethod === "card" && (
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-white/30">
-                  Card details
-                </p>
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="4242 4242 4242 4242"
-                    readOnly
-                    className="h-12 w-full rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 text-base text-white/50 outline-none"
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="MM / YY"
-                      readOnly
-                      className="h-12 rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 text-base text-white/50 outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="CVC"
-                      readOnly
-                      className="h-12 rounded-xl border border-white/[0.06] bg-white/[0.04] px-4 text-base text-white/50 outline-none"
-                    />
-                  </div>
-                </div>
-                <p className="text-[11px] text-white/20">
-                  Mock card — any values accepted. No real charge.
-                </p>
-              </div>
+        <div className="rounded-2xl border border-white/[0.12] bg-white/[0.02] p-5">
+          <h3 className="text-lg font-semibold text-white">
+            {intent?.provider === "razorpay" ? "Step 2: Complete checkout" : "Step 2: Simulate gateway response"}
+          </h3>
+          <p className="mt-2 text-sm text-white/50">
+            {intent?.provider === "razorpay"
+              ? "Razorpay checkout will call your payment verification endpoint and update booking payment status."
+              : "Mock webhook handler updates booking payment state. Use this for demo + UI validation."}
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {intent?.provider === "razorpay" ? (
+          <button
+              type="button"
+              onClick={() => void handleCheckout()}
+              disabled={
+                !intent ||
+                !intent.orderId ||
+                !intent.keyId ||
+                gatewayLoading ||
+                sdkLoading
+              }
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-white/20"
+              >
+                {gatewayLoading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
+                {gatewayLoading ? "Opening Razorpay..." : "Pay with Razorpay"}
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void simulateWebhook("captured")}
+                  disabled={!intent || webhookLoading === "captured"}
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-white/20"
+                >
+                  {webhookLoading === "captured" ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                  Simulate success
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void simulateWebhook("failed")}
+                  disabled={!intent || webhookLoading === "failed"}
+                  className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-white/20"
+                >
+                  {webhookLoading === "failed" ? <Loader2 size={16} className="animate-spin" /> : <AlertCircle size={16} />}
+                  Simulate failure
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void simulateWebhook("refunded")}
+                  disabled={!intent || webhookLoading === "refunded"}
+                  className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-white/20"
+                >
+                  {webhookLoading === "refunded" ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                  Simulate refund
+                </button>
+              </>
             )}
 
             <button
               type="button"
-              onClick={handlePay}
-              disabled={loading || status === "success"}
-              className="btn-shimmer group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-8 py-5 text-lg font-bold text-white shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-0.5 hover:shadow-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => void refreshBooking()}
+              disabled={!boundBookingMode || bookingLoading}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-4 py-2.5 text-sm font-semibold text-white/80 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {loading ? (
-                <Loader2 className="animate-spin" size={22} />
-              ) : status === "success" ? (
-                <CheckCircle size={22} />
-              ) : paymentMethod === "upi" ? (
-                <Smartphone size={22} />
-              ) : (
-                <CreditCard size={22} />
-              )}
-              {loading
-                ? "Processing…"
-                : status === "success"
-                  ? "Payment Complete"
-                  : `Pay via ${paymentMethod === "upi" ? "UPI" : "Card"} · ₹${amount.toLocaleString("en-IN")}`}
+              <RefreshCw size={16} />
+              Refresh booking
             </button>
-
-            {/* Status message */}
-            {message && (
-              <div
-                className={`flex items-start gap-3 rounded-2xl p-4 text-sm ${
-                  status === "success"
-                    ? "bg-emerald-500/10 text-emerald-400"
-                    : "bg-rose-500/10 text-rose-400"
-                }`}
-              >
-                {status === "success" ? (
-                  <CheckCircle size={18} className="mt-0.5 shrink-0" />
-                ) : (
-                  <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-                )}
-                <span>{message}</span>
-              </div>
-            )}
-
-            {/* Info pills */}
-            <div className="space-y-3 rounded-2xl bg-white/[0.02] p-5">
-              <div className="flex items-center gap-3 text-sm text-white/30">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06] text-[10px] font-bold text-white/40">
-                  1
-                </span>
-                Mock gateway — UPI &amp; Card both simulated
-              </div>
-              <div className="flex items-center gap-3 text-sm text-white/30">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06] text-[10px] font-bold text-white/40">
-                  2
-                </span>
-                Swap in live Razorpay/Stripe keys for production
-              </div>
-              <div className="flex items-center gap-3 text-sm text-white/30">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06] text-[10px] font-bold text-white/40">
-                  3
-                </span>
-                Webhook sample at{" "}
-                <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-xs text-emerald-400">
-                  /api/payments/mock-webhook
-                </code>
-              </div>
-            </div>
           </div>
+
+          {sdkLoading ? <p className="mt-2 text-xs text-white/50">Loading Razorpay script...</p> : null}
+          {gatewayError ? (
+            <p className="mt-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-2 text-xs text-rose-200">
+              {gatewayError}
+            </p>
+          ) : null}
         </div>
-      </section>
+      </div>
 
-      {/* ── Move progress tracker ── */}
-      {showMap && pickup && dropoff && (
-        <section className="glass rounded-2xl p-8 space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
-                <MapPin size={20} className="text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30">
-                  Live tracking
-                </p>
-                <h3 className="text-lg font-bold text-white">
-                  {pickup} → {dropoff}
-                </h3>
-              </div>
-            </div>
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold ${
-                moveProgress === 100
-                  ? "bg-emerald-500/15 text-emerald-400"
-                  : "bg-violet-500/15 text-violet-400"
-              }`}
-            >
-              {moveProgress === 100 ? (
-                <CheckCircle size={14} />
-              ) : (
-                <Loader2 size={14} className="animate-spin" />
-              )}
-              {moveProgress}%
-            </span>
-          </div>
-
-          <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-violet-500 transition-all duration-300"
-              style={{ width: `${moveProgress}%` }}
-            />
-          </div>
-
-          <div className="overflow-hidden rounded-2xl border border-white/[0.06]">
-            <ServiceMap />
-          </div>
-
-          {moveProgress === 100 && (
-            <div className="flex flex-col items-center gap-2 rounded-2xl bg-emerald-500/10 p-6 text-center">
-              <PartyPopper size={28} className="text-emerald-400" />
-              <p className="text-xl font-bold text-white">Move Complete!</p>
-              <p className="text-sm text-white/40">
-                Your items have been safely delivered to {dropoff}
-              </p>
-            </div>
-          )}
+      {!boundBookingMode && hasListingContext ? (
+        <section className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+          <p className="text-sm font-semibold text-emerald-100">Listing payment context</p>
+          <p className="mt-2 text-sm text-white/80">
+            <span className="text-white/40">Listing:</span>{" "}
+            {listingContext.listingName || listingContext.listingId || "Standalone"}
+          </p>
+          <p className="mt-1 text-xs text-white/60">
+            {listingContext.listingSource && listingContext.listingDestination
+              ? `${listingContext.listingSource} → ${listingContext.listingDestination}`
+              : "Route context not specified"}
+          </p>
         </section>
-      )}
-    </div>
+      ) : null}
+
+      {message ? (
+        <div
+          className={`mt-6 rounded-xl border p-3 text-sm ${
+            message.variant === "error"
+              ? "border-rose-500/30 bg-rose-500/12 text-rose-200"
+              : "border-emerald-500/30 bg-emerald-500/12 text-emerald-200"
+          }`}
+        >
+          {message.text}
+        </div>
+      ) : null}
+
+      <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-5">
+        <p className="text-xs text-white/50">
+          Booking flow is explicit for auditability and secure status transitions.
+        </p>
+        <Link
+          href="/dashboard"
+          className="rounded-lg border border-emerald-500/40 px-3 py-2 text-sm text-emerald-200 transition hover:bg-emerald-500/10"
+        >
+          Open dashboard
+        </Link>
+      </div>
+    </section>
   );
 }

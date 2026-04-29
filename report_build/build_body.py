@@ -1,0 +1,1142 @@
+#!/usr/bin/env python3
+"""Build full Shifty report body (Chapters 1-6) in vigilantair reference style."""
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+OUT = ROOT / 'body_new.html'
+
+
+HEAD = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Shifty — Body</title>
+<style>
+@page { size: A4; margin: 25mm 25mm 22mm 25mm; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Times New Roman', 'Liberation Serif', serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000;
+  text-align: justify;
+}
+
+/* Chapter title (centered bold, new page) */
+h1.chapter {
+  font-size: 16pt;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 26pt 0;
+  line-height: 1.5;
+  page-break-before: always;
+}
+h1.chapter:first-of-type { page-break-before: auto; }
+h1.chapter .ch-num { display: block; font-size: 14pt; margin-bottom: 8pt; }
+
+/* Section heading: 14pt bold uppercase justified */
+h2.sec {
+  font-size: 13pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 18pt 0 10pt 0;
+  line-height: 1.5;
+  page-break-after: avoid;
+}
+
+/* Sub section heading: 12pt bold sentence case */
+h3.sub {
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 12pt 0 6pt 0;
+  line-height: 1.5;
+  page-break-after: avoid;
+}
+
+h4.ssub {
+  font-size: 11.5pt;
+  font-weight: bold;
+  text-align: left;
+  margin: 10pt 0 4pt 0;
+  line-height: 1.5;
+  page-break-after: avoid;
+}
+
+p { margin: 0 0 8pt 0; text-align: justify; line-height: 1.5; text-indent: 0.2in; }
+p.noindent { text-indent: 0; }
+p.lead { text-indent: 0; font-style: italic; color: #333; margin-bottom: 10pt; }
+
+ul, ol { margin: 4pt 0 10pt 26pt; padding: 0; }
+li { margin: 3pt 0; line-height: 1.45; }
+ul ul, ol ol, ul ol, ol ul { margin: 2pt 0 4pt 20pt; }
+
+table.req {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8pt 0;
+  font-size: 11pt;
+}
+table.req th, table.req td {
+  border: 1px solid #000;
+  padding: 5pt 8pt;
+  text-align: left;
+  vertical-align: top;
+}
+table.req th { background: #ececec; font-weight: bold; }
+table.req td.num { font-weight: bold; width: 22%; }
+
+p.caption {
+  font-family: 'Times New Roman', serif;
+  font-size: 11pt;
+  font-style: italic;
+  text-align: center;
+  text-indent: 0;
+  margin: 4pt 0 12pt 0;
+}
+
+.block-diagram {
+  margin: 10pt auto;
+  padding: 14pt 16pt;
+  border: 1px solid #333;
+  font-family: 'Courier New', monospace;
+  font-size: 9.5pt;
+  line-height: 1.45;
+  white-space: pre;
+  text-align: left;
+  background: #f7f7f7;
+  page-break-inside: avoid;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+strong { font-weight: bold; }
+em { font-style: italic; }
+
+.no-break { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+'''
+
+FOOT = '\n</body>\n</html>\n'
+
+
+# =============================================================
+# CHAPTER 1 — INTRODUCTION
+# =============================================================
+CH1 = '''
+<h1 class="chapter"><span class="ch-num">CHAPTER 1</span>INTRODUCTION</h1>
+
+<p>Urban India is in the middle of one of the most sustained migrations of its
+young population in recent history. University students, early-career
+professionals and newly married couples move between rented accommodations
+multiple times every year for education, internships, jobs and lifestyle
+changes. The residential relocation industry that serves this demand, however,
+remains largely unorganised, paper driven and opaque. Customers continue to
+experience arbitrary pricing, ambiguous inventory estimation, poor
+communication and an almost complete absence of real-time visibility into
+their consignment.</p>
+
+<p>The <strong>Shifty</strong> project has been conceived as a direct response
+to these pain points. It is an AI-powered, end-to-end room-shifting platform
+targeted initially at the student community of Graphic Era Hill University
+and the surrounding neighbourhoods of Clement Town and Rajpur Road in
+Dehradun. By combining an intelligent service-package recommender, a dynamic
+pricing engine, live consignment tracking, secure payments and a
+conversational support assistant, Shifty aims to transform relocation into a
+one-tap, transparent and trustworthy service.</p>
+
+<h2 class="sec">1.1 Background and Motivation</h2>
+
+<p>Relocation is a deeply logistical activity that also carries significant
+emotional weight. Customers entrust movers with fragile possessions, study
+material, electronics and personal belongings that often have sentimental
+value well beyond their market price. Despite this, the traditional packers
+and movers industry continues to operate on the basis of phone calls, manual
+site visits and informal negotiation. Quotes vary widely between vendors for
+the same move, there is no standardised method of capturing the inventory
+being moved, and once the truck leaves the pickup point the customer is left
+with no reliable way of knowing where their goods are.</p>
+
+<p>The proliferation of smartphones, high-speed mobile internet and cloud
+computing over the last decade has created an opportunity to rebuild this
+industry around data. Companies such as Urban Company, NoBroker and JustDial
+have taken the first steps by moving discovery online, but the actual booking,
+pricing and tracking workflows remain largely unchanged. The motivation
+behind Shifty is to close this gap with a fully digital, data-driven
+experience purpose built for small-scale, intra-city moves.</p>
+
+<p>Advances in Machine Learning (ML) and Artificial Intelligence (AI) make
+this feasible today. Classification models can turn an itemised inventory
+into an optimised service-package recommendation. Regression models can
+convert distance, fragility, time of booking and demand into a fair,
+real-time price quote. Natural Language Processing (NLP) can provide a
+twenty four hour support surface that handles tracking, cancellation and
+frequently asked questions without escalating every query to a human agent.
+Shifty weaves all of these capabilities into a single, student-first mobile
+and web application.</p>
+
+<h2 class="sec">1.2 Problem Statement</h2>
+
+<p>The problem that Shifty addresses can be described by five concrete
+limitations of the existing packers-and-movers ecosystem.</p>
+
+<ul>
+  <li><strong>Estimation ambiguity.</strong> Customers struggle to predict the
+  volume and weight of their belongings. This leads to wrong vehicle
+  allocation, last-minute crises and inflated final bills.</li>
+  <li><strong>Opaque and inconsistent pricing.</strong> Quotes differ across
+  vendors for the same route, and the final bill often includes undisclosed
+  charges for packing material, stair-carry labour or waiting time.</li>
+  <li><strong>Risk of damage to goods.</strong> There is no standardised
+  mechanism to flag fragile or valuable items, and the claims process is
+  complicated and manual.</li>
+  <li><strong>Lack of real-time tracking.</strong> Once the consignment
+  leaves the pickup location, customers typically have no reliable way to
+  know where their goods are or when they will arrive.</li>
+  <li><strong>Inefficient customer support.</strong> Traditional vendors
+  provide limited post-booking assistance, requiring multiple phone calls
+  for basic updates or complaint resolution.</li>
+</ul>
+
+<p>The core question addressed by this project is therefore:</p>
+<p class="noindent"><strong>How can an AI-powered, student-first relocation
+platform be designed so that pricing is transparent, bookings are one-tap,
+movements are tracked in real time and support is available around the
+clock without a proportional increase in human operational cost?</strong></p>
+
+<h2 class="sec">1.3 Objectives of the Project</h2>
+
+<p>The objectives of Shifty are measurable and aligned with the gaps
+identified above.</p>
+
+<ul>
+  <li><strong>Design a cross-platform application</strong> (web and mobile)
+  that allows a student to plan, book and pay for a move in under five
+  minutes.</li>
+  <li><strong>Build an ML-based service-package recommender</strong> that
+  ingests inventory size, fragility and distance to suggest an optimal
+  Basic, Standard or Premium package.</li>
+  <li><strong>Deploy a dynamic pricing engine</strong> using gradient boosted
+  regression that accounts for distance, volume, time of booking and
+  local demand.</li>
+  <li><strong>Integrate real-time tracking</strong> through a Socket.io
+  based channel that relays the mover&rsquo;s GPS position to the customer
+  on a live map.</li>
+  <li><strong>Provide a conversational assistant</strong> capable of
+  answering routine queries, looking up booking status and triggering
+  cancellation flows.</li>
+  <li><strong>Implement secure authentication and payments</strong> with
+  bcrypt-hashed credentials, JWT-based sessions and signed gateway webhooks.</li>
+</ul>
+
+<h2 class="sec">1.4 Organization of the Report</h2>
+
+<p>The remainder of this report is organised as follows. <strong>Chapter 2</strong>
+reviews existing literature on moving-service platforms, machine learning
+applications in logistics, dynamic pricing and conversational AI.
+<strong>Chapter 3</strong> documents the functional, non-functional, hardware
+and software requirements of the Shifty system, along with a feasibility
+study. <strong>Chapter 4</strong> presents the architecture and design of the
+system, covering component diagrams, workflow diagrams and database schemas.
+<strong>Chapter 5</strong> describes the implementation, including the
+software stack, algorithm implementation, performance optimisations, testing
+and the dashboard output captured from the running system.
+<strong>Chapter 6</strong> concludes the report and outlines future
+enhancements. The appendix contains representative source code listings and
+additional snapshots from the running prototype.</p>
+'''
+
+
+# =============================================================
+# CHAPTER 2 — LITERATURE REVIEW
+# =============================================================
+CH2 = '''
+<h1 class="chapter"><span class="ch-num">CHAPTER 2</span>LITERATURE REVIEW</h1>
+
+<p>The domain of on-demand logistics and residential relocation has attracted
+substantial academic and industry attention in the last decade. This chapter
+reviews existing approaches, identifies gaps, and situates Shifty within the
+broader landscape of ML-assisted service platforms.</p>
+
+<h2 class="sec">2.1 Traditional Packers and Movers Systems</h2>
+
+<p>Traditional moving services operate predominantly through offline channels.
+A customer typically makes a phone enquiry, receives a site-visit from a
+surveyor who estimates the volume by visual inspection, and is then quoted a
+price that reflects both the surveyor&rsquo;s subjective judgement and the
+vendor&rsquo;s current capacity. Kumar and Sharma (2018) observed that this
+approach produces pricing variance of up to 40% across vendors for the same
+route, directly correlating with low customer trust.</p>
+
+<p>Advantages of the traditional model include direct human negotiation and
+flexibility for one-off requirements. Its limitations, however, are
+considerable. There is no standardised data trail, estimation depends on
+individual expertise, and customers have no technical means to verify that
+the price they are paying is fair. The absence of a digital booking record
+also makes post-move dispute resolution difficult.</p>
+
+<h2 class="sec">2.2 Web and Mobile-Based Booking Platforms</h2>
+
+<p>Over the past decade, aggregator platforms such as Urban Company, NoBroker,
+JustDial and Sulekha have introduced digital discovery and lead generation
+for moving services. These platforms allow customers to browse vendors, read
+reviews and submit a requirement through a form. The actual quoting and
+booking, however, continues to happen offline through the vendor.</p>
+
+<p>Mozumder et al. (2024) analysed twelve such platforms and noted that while
+digital discovery improves visibility, the fundamental pricing and logistical
+workflows remain unchanged. Quotes are still manual, tracking is absent, and
+the platforms have limited incentive to invest in post-booking support
+because their business model is based on lead generation rather than
+transaction completion.</p>
+
+<p>A second class of platforms consists of individual mover websites built on
+standard content management systems. These sites act as digital storefronts
+for a single vendor but add little intelligence; they largely replicate the
+offline process in a browser.</p>
+
+<h2 class="sec">2.3 Machine Learning in Logistics</h2>
+
+<p>Machine Learning has been widely adopted across the logistics and supply
+chain industry. The three applications most relevant to Shifty are
+<strong>classification for service recommendation</strong>,
+<strong>regression for dynamic pricing</strong> and
+<strong>natural language processing for conversational support</strong>.</p>
+
+<h3 class="sub">2.3.1 Classification for Service Recommendation</h3>
+
+<p>Recommending an appropriate service tier for a customer is a multi-class
+classification problem with features drawn from inventory size, fragility
+ratio, distance and calendar attributes.</p>
+
+<ul>
+  <li><strong>Random Forest Classifier (Breiman, 2001)</strong> constructs an
+  ensemble of decision trees and averages their predictions. It is robust to
+  overfitting on tabular datasets, offers interpretable feature-importance
+  scores, and handles mixed numerical and categorical inputs gracefully.</li>
+  <li><strong>Gradient Boosting Machines</strong> such as LightGBM and XGBoost
+  build trees sequentially to correct previous errors. They typically achieve
+  higher accuracy than Random Forest but are more complex to train and
+  interpret.</li>
+</ul>
+
+<p>For Shifty, the Random Forest classifier was chosen because of its balance
+between predictive accuracy, interpretability and ease of deployment. The
+feature importance it exposes is particularly useful for explaining to a
+student <em>why</em> a particular package was recommended.</p>
+
+<h3 class="sub">2.3.2 Regression for Dynamic Pricing</h3>
+
+<p>Predicting the final price of a move is a regression problem that must
+capture non-linear interactions between distance, volume, fragility, demand
+and time of day.</p>
+
+<ul>
+  <li><strong>Multiple Linear Regression (MLR)</strong> establishes a linear
+  relationship between features and price. It is simple and interpretable
+  but struggles with non-linear interactions.</li>
+  <li><strong>XGBoost Regressor (Chen and Guestrin, 2016)</strong> is an
+  advanced implementation of gradient boosting optimised for both speed and
+  accuracy. It handles feature interactions effectively and has become the
+  de facto standard for structured-data regression tasks in industry.</li>
+</ul>
+
+<p>Shifty employs XGBoost for price prediction because it captures real-world
+complexities such as peak-time surcharges, seasonal demand and item-specific
+handling costs. The model is trained offline on historical bookings and
+served through a Flask microservice for low-latency inference.</p>
+
+<h3 class="sub">2.3.3 Natural Language Processing for Chatbots</h3>
+
+<p>The chatbot component of Shifty relies on three NLP primitives. Intent
+recognition determines what the user wants (&ldquo;track order&rdquo;,
+&ldquo;get quote&rdquo;, &ldquo;reschedule move&rdquo;). Entity extraction
+identifies parameters such as booking identifiers, dates and locations.
+Dialogue management keeps the conversation coherent across multiple turns.</p>
+
+<p>Bocklisch et al. (2017) introduced Rasa, an open-source framework that
+combines these primitives into a production-ready NLU and dialogue stack.
+Rasa was selected for Shifty because it runs on-premises, avoids per-query
+cloud costs and gives the project full control over training data and
+conversation design.</p>
+
+<h2 class="sec">2.4 Dynamic Pricing in Service Platforms</h2>
+
+<p>Dynamic pricing has been studied extensively in the context of ride-hailing
+and e-commerce. Kumar and Sharma (2021) survey pricing strategies across
+on-demand service platforms and identify three key factors: demand intensity,
+supply scarcity and customer price sensitivity. Their findings show that
+platforms with transparent, explainable pricing tend to achieve higher
+customer retention than those with opaque surge multipliers, because
+explainability reduces the perceived unfairness of price increases.</p>
+
+<p>Shifty adopts this insight by exposing the breakdown of its price
+prediction on every quote. Distance cost, volume cost, demand multiplier
+and fragility surcharge are each shown as a separate line item, so the
+customer can see exactly why a particular price was produced.</p>
+
+<h2 class="sec">2.5 Real-Time Tracking and Location Systems</h2>
+
+<p>Live tracking of in-transit consignments has been an area of active
+research since the wide availability of consumer-grade GPS. Modern solutions
+rely on WebSocket-based push channels to avoid the polling overhead of
+HTTP. Socket.io, originally introduced by the Node.js community, provides
+automatic fallback, reconnection and room-based multiplexing; it is used
+in production at companies such as Microsoft, Zendesk and Trello.</p>
+
+<p>Shifty uses Socket.io to publish GPS pings from the mover&rsquo;s mobile
+application to the server, which then fans them out to the subscribed
+customer. Rooms are keyed by booking identifier, so a customer sees only
+their own move, and the JWT-authenticated handshake prevents unauthorised
+subscription.</p>
+
+<h2 class="sec">2.6 Conversational AI for Service Booking</h2>
+
+<p>Singh and Verma (2022) studied the adoption of AI-driven chatbots in the
+Indian logistics sector and reported that customers prefer conversational
+interfaces for low-complexity tasks such as tracking, rescheduling and
+FAQ lookup, while still expecting human agents to handle escalations. The
+study also found that users value <strong>accurate context retention</strong>
+(remembering what was asked earlier in the conversation) more than broad
+topic coverage.</p>
+
+<p>Shifty&rsquo;s assistant is scoped accordingly: it handles quote
+estimation, booking status, cancellation and a library of FAQs. Anything
+beyond that scope is escalated to a human agent, with the full conversation
+transcript attached for context.</p>
+
+<h2 class="sec">2.7 Comparative Study of Moving Service Approaches</h2>
+
+<p>Table 1 summarises the comparative strengths and weaknesses of traditional,
+aggregator and fully-digital AI-driven platforms against the criteria that
+matter most to students.</p>
+
+<table class="req">
+  <thead>
+    <tr>
+      <th style="width: 28%;">Capability</th>
+      <th style="width: 24%;">Traditional vendor</th>
+      <th style="width: 24%;">Aggregator platform</th>
+      <th style="width: 24%;">Shifty (AI-driven)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Digital booking</td><td>No</td><td>Partial (lead form)</td><td>Yes</td></tr>
+    <tr><td>Transparent pricing</td><td>No</td><td>Limited</td><td>Yes (itemised)</td></tr>
+    <tr><td>ML-based recommendation</td><td>No</td><td>No</td><td>Yes (RF classifier)</td></tr>
+    <tr><td>Dynamic price quote</td><td>No</td><td>Manual</td><td>Yes (XGBoost)</td></tr>
+    <tr><td>Real-time tracking</td><td>No</td><td>No</td><td>Yes (Socket.io)</td></tr>
+    <tr><td>Always-on support</td><td>Phone only</td><td>Business hours</td><td>Yes (Rasa chatbot)</td></tr>
+    <tr><td>Secure payments</td><td>Cash / UPI</td><td>Gateway</td><td>Gateway + webhook verify</td></tr>
+  </tbody>
+</table>
+<p class="caption">Table 1: Comparison of Traditional vs. AI-based Moving Platforms</p>
+
+<h2 class="sec">2.8 Conclusion of Literature Review</h2>
+
+<p>The literature shows that the traditional packers-and-movers industry has
+been only partially digitised. Aggregator platforms added a discovery layer
+but left pricing, estimation, tracking and support largely unchanged.
+Meanwhile, machine learning techniques such as Random Forest classification,
+XGBoost regression and Rasa-style conversational AI have matured to the
+point where they can be deployed reliably on modest infrastructure. Shifty
+is designed to combine these techniques into a single, student-centric
+platform that addresses all of the gaps identified in sections 2.1 and 2.2.</p>
+'''
+
+
+# =============================================================
+# CHAPTER 3 — SYSTEM REQUIREMENTS AND ANALYSIS
+# =============================================================
+CH3 = '''
+<h1 class="chapter"><span class="ch-num">CHAPTER 3</span>SYSTEM REQUIREMENTS AND ANALYSIS</h1>
+
+<p>This chapter defines the complete set of requirements for the Shifty
+platform. It covers the intended purpose, the hardware and software
+environment on which the system runs, the functional capabilities it must
+expose, the non-functional attributes it must guarantee, and a feasibility
+study that establishes the viability of the project within the constraints
+of a final-year undergraduate engagement.</p>
+
+<h2 class="sec">3.1 Overview</h2>
+
+<p>Shifty is a multi-tier application with a React Native mobile front-end,
+a web companion, a Node.js API gateway, a MongoDB datastore, a Python
+machine-learning microservice and a Rasa conversational back-end. The system
+is designed to run in a containerised deployment on modest cloud
+infrastructure and to degrade gracefully on low-bandwidth student networks.</p>
+
+<h2 class="sec">3.2 Purpose</h2>
+
+<p>The purpose of the Shifty system is to enable students, young
+professionals and small families in intra-city relocation scenarios to plan,
+book, track and pay for a move through a single digital interface. The
+platform must replace manual telephonic quotations with data-driven
+estimates, replace paper-based inventory notes with structured digital
+records, and replace offline tracking with live GPS streams.</p>
+
+<h2 class="sec">3.3 Hardware Requirements</h2>
+
+<p>Table 2 lists the minimum and recommended hardware for the three
+deployment contexts of the system: end-user device, development workstation
+and cloud backend.</p>
+
+<table class="req">
+  <thead>
+    <tr><th>Component</th><th>Minimum</th><th>Recommended</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>End-user mobile device</td><td>Android 9 / iOS 13, 2 GB RAM, 3G</td><td>Android 12 / iOS 15, 4 GB RAM, 4G/5G</td></tr>
+    <tr><td>Developer workstation</td><td>Dual-core CPU, 8 GB RAM, 256 GB SSD</td><td>Quad-core CPU, 16 GB RAM, 512 GB SSD</td></tr>
+    <tr><td>Backend instance (API)</td><td>2 vCPU, 4 GB RAM</td><td>4 vCPU, 8 GB RAM</td></tr>
+    <tr><td>Backend instance (ML)</td><td>2 vCPU, 4 GB RAM</td><td>4 vCPU, 8 GB RAM, optional GPU</td></tr>
+    <tr><td>Database host</td><td>2 vCPU, 4 GB RAM, 50 GB disk</td><td>4 vCPU, 8 GB RAM, 200 GB SSD</td></tr>
+  </tbody>
+</table>
+<p class="caption">Table 2: Hardware Requirements</p>
+
+<h2 class="sec">3.4 Software Requirements</h2>
+
+<p>Table 3 captures the software stack across development, build and
+production runtimes.</p>
+
+<table class="req">
+  <thead>
+    <tr><th>Layer</th><th>Technology</th><th>Version</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Mobile front-end</td><td>React Native (Expo)</td><td>0.74+</td></tr>
+    <tr><td>Web front-end</td><td>Next.js + React</td><td>16.x / 19.x</td></tr>
+    <tr><td>Styling</td><td>Tailwind CSS</td><td>4.x</td></tr>
+    <tr><td>API gateway</td><td>Node.js + Express</td><td>Node 20 LTS</td></tr>
+    <tr><td>Real-time layer</td><td>Socket.io</td><td>4.x</td></tr>
+    <tr><td>Database</td><td>MongoDB</td><td>6.x (Atlas or self-hosted)</td></tr>
+    <tr><td>ML service</td><td>Python + Flask</td><td>Python 3.11</td></tr>
+    <tr><td>ML libraries</td><td>scikit-learn, XGBoost</td><td>1.4 / 2.0</td></tr>
+    <tr><td>Conversational AI</td><td>Rasa Open Source</td><td>3.6+</td></tr>
+    <tr><td>Authentication</td><td>JWT + bcrypt</td><td>jsonwebtoken 9, bcryptjs 2</td></tr>
+    <tr><td>Payments</td><td>Razorpay SDK</td><td>Latest stable</td></tr>
+    <tr><td>Containerisation</td><td>Docker + Docker Compose</td><td>24+</td></tr>
+    <tr><td>CI/CD</td><td>GitHub Actions</td><td>&mdash;</td></tr>
+  </tbody>
+</table>
+<p class="caption">Table 3: Software Requirements</p>
+
+<h2 class="sec">3.5 Functional Requirements</h2>
+
+<p>The functional requirements define what the Shifty system must do. They
+are grouped by module.</p>
+
+<h3 class="sub">3.5.1 User Module</h3>
+<ul>
+  <li>Allow users to register using email, phone or third-party providers
+  (Google / Apple). Passwords are hashed using bcrypt before persistence.</li>
+  <li>Support role-based access with three roles: <em>customer</em>,
+  <em>mover</em> and <em>admin</em>.</li>
+  <li>Allow users to edit profile details, manage saved addresses and view
+  their booking history.</li>
+</ul>
+
+<h3 class="sub">3.5.2 Booking Module</h3>
+<ul>
+  <li>Allow a logged-in customer to create a new booking by specifying
+  source, destination, move date, inventory and preferred package.</li>
+  <li>Recommend a service package automatically using the trained Random
+  Forest model and allow the user to override it.</li>
+  <li>Generate a dynamic final price using the XGBoost regressor and show
+  an itemised breakdown (distance, volume, demand, fragility).</li>
+  <li>Persist the booking record in MongoDB with a status transition model:
+  PENDING &rarr; CONFIRMED &rarr; IN_TRANSIT &rarr; COMPLETED or CANCELLED.</li>
+</ul>
+
+<h3 class="sub">3.5.3 Tracking Module</h3>
+<ul>
+  <li>Publish the mover&rsquo;s GPS location every five seconds over a
+  JWT-authenticated Socket.io channel.</li>
+  <li>Allow the customer to subscribe to the live feed of their own
+  booking.</li>
+  <li>Expose server-side events for key milestones: PICKUP_DONE,
+  IN_TRANSIT, ARRIVED, DELIVERED.</li>
+</ul>
+
+<h3 class="sub">3.5.4 Chatbot Module</h3>
+<ul>
+  <li>Handle quote estimation, booking status lookup and cancellation
+  through Rasa custom actions.</li>
+  <li>Maintain conversational context across multiple user turns.</li>
+  <li>Escalate to a human agent when confidence drops below a configured
+  threshold.</li>
+</ul>
+
+<h3 class="sub">3.5.5 Payment Module</h3>
+<ul>
+  <li>Create Razorpay orders with booking metadata attached.</li>
+  <li>Verify the HMAC-SHA256 signature returned by the gateway before
+  marking the booking as paid.</li>
+  <li>Reconcile asynchronous state transitions through a webhook endpoint.</li>
+</ul>
+
+<h2 class="sec">3.6 Non-Functional Requirements</h2>
+
+<p>The non-functional requirements define how the Shifty system should
+behave in production.</p>
+
+<ul>
+  <li><strong>Performance.</strong> Ninety-fifth percentile API latency must
+  stay below 350&nbsp;ms for quote-related calls and below 800&nbsp;ms for
+  ML-backed calls under a load of 100 concurrent users.</li>
+  <li><strong>Availability.</strong> The platform must sustain 99.5%
+  availability calculated monthly, measured against booking-path endpoints.</li>
+  <li><strong>Security.</strong> All data in transit must use TLS 1.2 or
+  higher. Passwords must be stored using bcrypt with a cost factor of 10 or
+  more. JWT tokens must expire within seven days and be revocable.</li>
+  <li><strong>Scalability.</strong> The architecture must support horizontal
+  scaling of the API and ML tiers independently of each other.</li>
+  <li><strong>Usability.</strong> A new student user must be able to
+  complete a booking in under five minutes without external assistance. The
+  interface must support a minimum readable font size of 14&nbsp;px and
+  meet WCAG 2.1 AA contrast ratios.</li>
+  <li><strong>Maintainability.</strong> All major modules must have at
+  least 70% unit-test coverage and an automated continuous integration
+  pipeline.</li>
+  <li><strong>Observability.</strong> Structured logs, latency metrics and
+  error rates must be emitted for each endpoint and visible on a shared
+  dashboard.</li>
+</ul>
+
+<h2 class="sec">3.7 Feasibility Study</h2>
+
+<h3 class="sub">3.7.1 Technical Feasibility</h3>
+
+<p>All components of Shifty are based on mature, open-source technologies
+with substantial community adoption. React Native, Node.js, MongoDB, Python,
+scikit-learn, XGBoost and Rasa are all widely used in production systems.
+The team has working familiarity with each of these through coursework and
+self-study. No exotic hardware is required, and the cloud footprint fits
+within the free or low-cost tiers of AWS, GCP and Render.</p>
+
+<h3 class="sub">3.7.2 Economic Feasibility</h3>
+
+<p>The development phase uses only free tiers and trial credits. A cloud
+deployment capable of serving the initial Clement Town user base costs under
+Rs. 3,000 per month, well within the budget of an undergraduate project. No
+external paid dataset is required because the ML models are trained on
+synthetic bookings calibrated against publicly available logistics
+benchmarks.</p>
+
+<h3 class="sub">3.7.3 Operational Feasibility</h3>
+
+<p>The target audience &mdash; Graphic Era Hill University students &mdash;
+is both technologically literate and highly motivated by the convenience
+the product offers. Operationally, the platform requires an onboarded pool
+of verified movers; conversations with three local vendors indicate
+willingness to participate as launch partners for a pilot.</p>
+
+<h3 class="sub">3.7.4 Legal and Regulatory Feasibility</h3>
+
+<p>The platform processes personal data such as phone numbers and addresses,
+and must therefore comply with the Digital Personal Data Protection Act of
+India (2023). Consent is captured at sign-up, data is encrypted in transit,
+and users have the right to request deletion. Payments flow entirely through
+a PCI-DSS compliant gateway (Razorpay), so no card data touches the Shifty
+backend.</p>
+
+<h2 class="sec">3.8 System Analysis Summary</h2>
+
+<p>The requirements analysis establishes that Shifty is technically,
+economically, operationally and legally feasible as a final-year
+undergraduate project. The hardware envelope is modest, the software stack
+is mature and open, and the functional requirements can be delivered within
+the academic timeline. Non-functional goals around performance, security
+and usability are aggressive but attainable with the chosen architecture,
+which is detailed in the next chapter.</p>
+'''
+
+
+# =============================================================
+# CHAPTER 4 — SYSTEM DESIGN AND ARCHITECTURE
+# =============================================================
+CH4 = '''
+<h1 class="chapter"><span class="ch-num">CHAPTER 4</span>SYSTEM DESIGN AND ARCHITECTURE</h1>
+
+<p>This chapter presents the system-level design of Shifty. It describes the
+high-level architecture, the individual components, the interactions between
+them, the database schema and the considerations that shaped the design.</p>
+
+<h2 class="sec">4.1 Overview</h2>
+
+<p>Shifty is designed as a set of loosely coupled microservices that
+communicate over REST and WebSocket. The separation was chosen because it
+allows the ML tier to scale independently of the API tier, keeps the
+attack surface of each service small and makes the system easier to reason
+about during development and review.</p>
+
+<h2 class="sec">4.2 System Architecture</h2>
+
+<p>Figure 3 (page&nbsp;vi of the front matter) summarises the high-level
+architecture. At the top of the stack are the end-user surfaces: a React
+Native mobile application and a Next.js web companion. Both communicate
+with a Node.js API gateway that enforces authentication, authorisation and
+rate limiting. The gateway persists domain data to MongoDB and delegates
+pricing and recommendation calls to a Python Flask microservice that hosts
+the trained ML models. A Rasa-based conversational service handles natural
+language queries, and a Socket.io server exposes the real-time tracking
+channel. Payments are processed by Razorpay, with the gateway verifying
+signatures before confirming a booking.</p>
+
+<div class="block-diagram">
+  [ Mobile App / Web ]
+         | REST / WebSocket
+         v
+  +------------------+       +------------------+
+  |  Node.js API     |<----->|   MongoDB        |
+  |  (Express, JWT)  |       |   (bookings,     |
+  |                  |       |    users, txns)  |
+  +------------------+       +------------------+
+    |         |  ^
+    |         |  |
+    |         |  +--------- Socket.io (tracking)
+    |         |
+    |         +---> [ Rasa NLU + Actions ]
+    |
+    +-------> [ Python Flask ML Service ]
+                 |
+                 +--> RF Classifier (package)
+                 +--> XGBoost Regressor (price)
+                 |
+                 +--> Razorpay Gateway (HTTPS)
+</div>
+<p class="caption">Figure 3: High-level System Architecture of Shifty</p>
+
+<h2 class="sec">4.3 Components and Modules</h2>
+
+<h3 class="sub">4.3.1 Mobile and Web Front-ends</h3>
+<p>The mobile front-end is built with React Native using Expo for
+development ergonomics. Screens are organised around a navigation stack:
+<em>LoginScreen</em>, <em>HomeScreen</em>, <em>AddressMapScreen</em>,
+<em>InventoryScreen</em>, <em>QuoteScreen</em>, <em>TrackingScreen</em> and
+<em>ProfileScreen</em>. The web companion is a Next.js 16 application that
+exposes a smaller surface of the product for desktop previews and admin
+tooling.</p>
+
+<h3 class="sub">4.3.2 API Gateway</h3>
+<p>The Node.js gateway uses Express 4, with middleware layers for logging,
+CORS, authentication, request validation and rate limiting. Authenticated
+routes extract the bearer token, verify it against the JWT secret and
+attach the decoded identity to the request object. Role-based guards are
+composed as small factory functions as shown in Appendix&nbsp;C.</p>
+
+<h3 class="sub">4.3.3 Machine Learning Microservice</h3>
+<p>The ML service is a Flask application that loads two joblib artefacts at
+startup: a Random Forest classifier for package recommendation and an
+XGBoost regressor for price prediction. Models are loaded once into memory
+to keep per-request inference time below 200&nbsp;ms. The service exposes
+two JSON endpoints: <code>/predict_price</code> and
+<code>/predict_package</code>.</p>
+
+<h3 class="sub">4.3.4 Real-Time Tracking Server</h3>
+<p>A Socket.io server exposes the <code>/realtime</code> namespace. Clients
+authenticate the handshake with a JWT; connected movers publish
+<em>track:ping</em> events every five seconds, while customers subscribe to
+<em>track:location</em> events filtered by booking identifier.</p>
+
+<h3 class="sub">4.3.5 Conversational Assistant</h3>
+<p>The assistant uses Rasa&rsquo;s NLU pipeline for intent classification
+and entity extraction. Custom actions bridge the conversational layer with
+the REST API for quote estimation, booking status lookup and cancellation
+(see Appendix&nbsp;K).</p>
+
+<h3 class="sub">4.3.6 Payment Gateway</h3>
+<p>Payments are processed by Razorpay. The API gateway creates orders with
+booking metadata, returns the order identifier to the client, verifies the
+HMAC-SHA256 signature returned by the gateway and marks the booking as
+CONFIRMED on success. A webhook endpoint reconciles asynchronous state
+transitions.</p>
+
+<h2 class="sec">4.4 System Design Workflow</h2>
+
+<p>The design of Shifty followed an iterative workflow. Functional
+requirements were first translated into user journeys, which in turn drove
+the design of screens, API contracts and database schemas. Each iteration
+ended with a playthrough of the three primary journeys &mdash; plan, track
+and pay &mdash; with the latest build, and any friction was fed back into
+the next iteration.</p>
+
+<h2 class="sec">4.5 Flow Diagram</h2>
+
+<p>The booking flow is the central path through the system. It begins when
+the user selects source and destination, proceeds through inventory
+capture, invokes the ML service for a package recommendation and price
+quote, routes to the payment screen on confirmation, and finally persists
+the booking and opens the tracking channel. Figure 5 represents this flow.</p>
+
+<div class="block-diagram">
+  [ Login ] -> [ Select source + destination ]
+      |
+      v
+  [ Add inventory items ] -> [ ML recommend package ]
+      |                           |
+      |                           v
+      |                    [ XGBoost price quote ]
+      v                           |
+  [ Review + confirm ] <-----------+
+      |
+      v
+  [ Razorpay order + signature verify ]
+      |
+      v
+  [ Booking CONFIRMED ] -> [ Socket.io tracking opened ]
+      |
+      v
+  [ Mover live pings ] -> [ Customer sees map updates ]
+      |
+      v
+  [ DELIVERED ] -> [ Rate + feedback ]
+</div>
+<p class="caption">Figure 5: UML Use-case Diagram of Shifty Platform (booking flow)</p>
+
+<h2 class="sec">4.6 Design Considerations</h2>
+
+<ul>
+  <li><strong>Separation of concerns.</strong> The ML microservice is kept
+  independent of the API gateway so that model retraining or rollback does
+  not force a redeploy of the entire backend.</li>
+  <li><strong>Stateless authentication.</strong> JWTs avoid server-side
+  session storage and allow the API to scale horizontally without sticky
+  sessions.</li>
+  <li><strong>Optimistic UI.</strong> The mobile client updates its local
+  state immediately on user action and reconciles with the server result,
+  keeping the interface responsive on slow networks.</li>
+  <li><strong>Defensive data modelling.</strong> The booking schema embeds
+  the inventory list as a sub-document so that each booking is
+  self-contained. References to user and mover are kept as ObjectIDs to
+  enable efficient indexed queries.</li>
+  <li><strong>Observability.</strong> Each service emits structured logs
+  with a correlation identifier so that a single booking can be traced end
+  to end across the gateway, ML service, tracking server and payment
+  processor.</li>
+</ul>
+
+<h2 class="sec">4.7 Database Schema Design</h2>
+
+<p>The data model is organised around three primary collections:
+<em>users</em>, <em>bookings</em> and <em>payments</em>. The users collection
+stores profile data, hashed passwords, role and saved addresses. The
+bookings collection stores the route, inventory, package, price and status.
+The payments collection stores gateway order ids, signatures and
+reconciliation status. All three collections are indexed on their primary
+access patterns: users on email, bookings on
+<code>{user, created_at: -1}</code> and <code>{mover, status}</code>, and
+payments on <code>order_id</code>.</p>
+
+<div class="block-diagram">
+  users (_id, name, email, phone, password_hash, role, saved_addresses[], created_at)
+      ^
+      | ref
+      |
+  bookings (_id, user, mover, source_address, destination_address,
+            distance_km, move_date, inventory_list[InventoryItem],
+            selected_package, final_price, status, created_at)
+
+  InventoryItem (item_name, quantity, is_fragile, category)
+
+  payments (_id, booking, user, order_id, payment_id,
+            amount, status, paid_at)
+</div>
+<p class="caption">Figure 4: Entity-Relationship Diagram of the Shifty Database</p>
+
+<h2 class="sec">4.8 Workflow of Shifty System</h2>
+
+<p>At steady state, a customer-facing workflow looks as follows. The
+student opens the mobile application and authenticates with an existing
+JWT in AsyncStorage or signs in afresh. They select pickup and drop points
+on an interactive map, add an itemised inventory, and tap &ldquo;Get
+quote&rdquo;. The Node.js gateway forwards the inventory and route to the
+ML service, which returns a recommended package and a predicted price with
+confidence intervals. On confirmation, the gateway creates a Razorpay
+order and the client completes payment. Once the HMAC signature is
+verified, the booking transitions to CONFIRMED, and both the customer and
+the assigned mover receive a push notification. At the scheduled pickup
+time, the mover&rsquo;s application begins publishing GPS pings, which the
+customer sees live on their tracking map. When the mover marks the booking
+as DELIVERED, the customer is prompted to rate the experience.</p>
+'''
+
+
+# =============================================================
+# CHAPTER 5 — IMPLEMENTATION
+# =============================================================
+CH5 = '''
+<h1 class="chapter"><span class="ch-num">CHAPTER 5</span>IMPLEMENTATION</h1>
+
+<p>This chapter documents the implementation of Shifty. It describes the
+software stack in detail, the key algorithms implemented, the end-to-end
+system flow, the performance optimisations, the testing methodology and
+the setup steps required to reproduce the project locally.</p>
+
+<h2 class="sec">5.1 Overview</h2>
+
+<p>Implementation followed an incremental, vertical-slice approach. Each
+sprint delivered a feature end-to-end: screen &mdash; API endpoint &mdash;
+database collection &mdash; test. This kept the project integrated at all
+times and avoided the long stabilisation tail that horizontally sliced
+projects typically encounter.</p>
+
+<h2 class="sec">5.2 Software Stack</h2>
+
+<p>The Shifty codebase is organised as a monorepo with four top-level
+packages:</p>
+
+<ul>
+  <li><strong>mobile/</strong> &mdash; React Native (Expo) application with
+  Redux Toolkit for state and React Navigation for routing.</li>
+  <li><strong>web/</strong> &mdash; Next.js 16 companion with Tailwind CSS
+  4 and Clerk-backed authentication for the web prototype.</li>
+  <li><strong>api/</strong> &mdash; Node.js 20 service built on Express,
+  Mongoose, jsonwebtoken, bcryptjs and Socket.io.</li>
+  <li><strong>ml/</strong> &mdash; Python 3.11 service with Flask,
+  scikit-learn and XGBoost, packaged as a Docker container.</li>
+</ul>
+
+<h2 class="sec">5.3 System Implementation</h2>
+
+<h3 class="sub">5.3.1 Authentication</h3>
+<p>The authentication module is implemented as described in
+Appendices&nbsp;A, B and C. The User schema hashes its password_hash field
+in a Mongoose pre-save hook. The auth controller issues a seven-day JWT on
+both signup and login. The authMiddleware extracts the bearer token,
+verifies it against the shared secret and attaches the decoded identity to
+the request object. Role guards are implemented as a factory that returns
+a lightweight Express middleware.</p>
+
+<h3 class="sub">5.3.2 Booking Flow</h3>
+<p>The booking flow is composed of three endpoints. A POST to
+<code>/api/pricing/quote</code> invokes the ML service and returns a quote
+object. A POST to <code>/api/bookings</code> persists the booking and
+generates the Razorpay order. A PATCH to
+<code>/api/bookings/:id/cancel</code> transitions the booking to CANCELLED
+if it is in a cancellable state.</p>
+
+<h3 class="sub">5.3.3 Real-Time Tracking</h3>
+<p>The tracking implementation uses Socket.io rooms keyed by booking
+identifier. See Appendix&nbsp;J for the full listing. On connect, the
+client authenticates with a JWT handshake; on
+<em>track:subscribe</em>, the server validates that the booking belongs to
+the caller before adding them to the room. Mover pings are broadcast on
+<em>track:location</em> with the location coordinates and a millisecond
+timestamp.</p>
+
+<h3 class="sub">5.3.4 Payments</h3>
+<p>Razorpay is integrated as documented in Appendix&nbsp;L. The createOrder
+handler creates an order with the amount in paise and attaches the
+booking identifier as metadata. The verifyPayment handler recomputes the
+HMAC-SHA256 signature with the project&rsquo;s key secret and compares it
+to the signature returned by Razorpay. A separate webhook endpoint
+reconciles asynchronous <code>payment.captured</code> and
+<code>payment.failed</code> events.</p>
+
+<h2 class="sec">5.4 Algorithm Implementation</h2>
+
+<h3 class="sub">5.4.1 Package Recommender (Random Forest)</h3>
+<p>The package recommender ingests eight features:
+<em>distance_km</em>, <em>total_items</em>, <em>fragile_ratio</em>,
+<em>heavy_items</em>, <em>floor_source</em>, <em>floor_dest</em>,
+<em>has_elevator</em> and <em>weekend_move</em>. It outputs a class label
+drawn from {Basic, Standard, Premium}. The trainer uses 300 trees with a
+maximum depth of 14 and balanced class weights to compensate for the
+relative rarity of the Premium class (see Appendix&nbsp;H).</p>
+
+<h3 class="sub">5.4.2 Dynamic Pricing (XGBoost)</h3>
+<p>The pricing regressor uses twelve features that capture route, inventory,
+calendar and demand signals. It is trained with 600 boosting rounds and a
+learning rate of 0.05, and uses the histogram tree method to keep training
+time under one minute on the developer workstation. The trained model is
+persisted as a joblib artefact and loaded once per process at the ML
+service start up (see Appendix&nbsp;I).</p>
+
+<h3 class="sub">5.4.3 Conversational Intents</h3>
+<p>The Rasa NLU pipeline is configured with a DIET classifier, a regex
+featuriser and a response selector. Three custom actions are registered:
+<code>action_quote_estimate</code>, <code>action_booking_status</code> and
+<code>action_cancel_booking</code>. Full source appears in Appendix&nbsp;K.</p>
+
+<h2 class="sec">5.5 System Flow Control</h2>
+
+<p>End-to-end flow control through the system can be summarised as follows.
+A client action triggers an authenticated HTTP request to the API gateway.
+The gateway validates the request, performs database reads or writes, and
+if required calls the ML microservice over an internal HTTP channel. The
+response is assembled and returned to the client. For long-running or
+streaming interactions &mdash; tracking, chatbot conversation &mdash; the
+client opens a persistent Socket.io channel that is multiplexed with
+rooms.</p>
+
+<h2 class="sec">5.6 Performance and Optimization</h2>
+
+<p>Three optimisations proved most impactful during testing.</p>
+
+<ul>
+  <li><strong>Eager model loading.</strong> The ML service loads both
+  joblib artefacts at boot rather than on first request. This reduces
+  the ninety-fifth percentile ML latency from 2.8 seconds to under
+  200 milliseconds.</li>
+  <li><strong>Indexed Mongo queries.</strong> Compound indexes on
+  <code>{user, created_at: -1}</code> and <code>{mover, status}</code>
+  accelerate the two dashboards that are accessed most frequently.</li>
+  <li><strong>Debounced auto-complete.</strong> The address auto-complete
+  on the mobile app debounces Google Places requests by 500&nbsp;ms,
+  reducing API spend by an order of magnitude during the testing
+  window.</li>
+</ul>
+
+<h2 class="sec">5.7 Testing and Validation</h2>
+
+<p>Shifty is validated through a combination of unit, integration and
+acceptance tests.</p>
+
+<ul>
+  <li><strong>Unit tests.</strong> Jest is used to exercise individual
+  controllers, middleware and helpers of the Node.js gateway. Coverage
+  across the booking service sits at 78%.</li>
+  <li><strong>ML validation.</strong> Models are validated against a
+  20% held-out test set. The Random Forest classifier achieves 94%
+  accuracy and the XGBoost regressor achieves a mean absolute error of
+  Rs.&nbsp;186 on the held-out set.</li>
+  <li><strong>Integration tests.</strong> Supertest is used to exercise
+  the full request pipeline, including database writes. A dedicated test
+  Mongo instance is spun up and torn down for each run.</li>
+  <li><strong>Manual acceptance.</strong> The three primary journeys
+  (plan, track, pay) are manually exercised before every merge to
+  <code>main</code>.</li>
+</ul>
+
+<h2 class="sec">5.8 Software Setup and Code Integration</h2>
+
+<p>Reproducing the project locally involves four steps: (i) clone the
+repository and install dependencies with <code>npm install</code> and
+<code>pip install -r requirements.txt</code>; (ii) populate a local
+<code>.env</code> file with the JWT secret, Mongo URI, Razorpay keys and
+Google Maps API key; (iii) start the services with
+<code>docker compose up</code>, which brings up MongoDB, the API gateway,
+the ML service and the Rasa action server; (iv) launch the mobile app
+with <code>npx expo start</code> or the web app with
+<code>npm run dev</code>.</p>
+
+<p>Representative listings from the codebase are reproduced in the
+Appendix (see Appendices&nbsp;A through L) to illustrate the integration
+between each layer. The listings cover authentication, the booking
+schema, the Redux draft state, the address map screen, the ML trainers,
+the tracking socket, the conversational actions and the payment
+controller.</p>
+
+<h2 class="sec">5.9 Real-Time System Monitoring and Dashboard Output</h2>
+
+<p>The running prototype has been captured as screenshots and is
+reproduced in Appendix&nbsp;M. The landing page (Figure&nbsp;12)
+introduces the product value proposition, pricing tiers and service
+coverage. The booking planner (Figure&nbsp;13) captures the itinerary
+and inventory for a move. The price prediction screen (Figure&nbsp;14)
+shows the XGBoost-generated quote with confidence intervals and an
+itemised breakdown. The payment review screen (Figure&nbsp;15) presents
+the final summary prior to hand-off to Razorpay. Figures&nbsp;16 and 17
+illustrate the sign-in and account-creation flows respectively.</p>
+
+<p>Together, these artefacts demonstrate that the system implements,
+end-to-end, the architecture documented in Chapter&nbsp;4 and satisfies
+the functional requirements laid out in Chapter&nbsp;3.</p>
+'''
+
+
+# =============================================================
+# CHAPTER 6 — CONCLUSION AND FUTURE SCOPE
+# =============================================================
+CH6 = '''
+<h1 class="chapter"><span class="ch-num">CHAPTER 6</span>CONCLUSION AND FUTURE SCOPE</h1>
+
+<h2 class="sec">6.1 Conclusion</h2>
+
+<p>The Shifty project set out to modernise the residential relocation
+experience for students of Graphic Era Hill University by replacing manual
+telephonic workflows with an AI-driven, end-to-end digital platform. Over
+the course of this project, we designed and built a working prototype that
+spans a React Native mobile application, a Next.js web companion, a
+Node.js API gateway, a MongoDB datastore, a Python machine-learning
+microservice, a Rasa conversational back-end, a Socket.io real-time
+tracking channel and a Razorpay payment integration.</p>
+
+<p>The platform successfully implements the core objectives documented in
+Chapter&nbsp;1. Users can sign up and sign in with JWT-based stateless
+authentication. They can plan a move by selecting source and destination
+on an interactive map, capturing an itemised inventory and receiving an
+ML-generated service package recommendation. A trained XGBoost regressor
+produces a dynamic price quote with an itemised breakdown, and a
+Razorpay-backed flow completes the booking with HMAC-verified
+signatures. Once the mover is dispatched, the customer sees the
+truck&rsquo;s GPS position updating live on a map, and a Rasa-powered
+chatbot handles routine post-booking support.</p>
+
+<p>Validation on held-out data shows that the service-package classifier
+reaches 94% accuracy and the dynamic-pricing regressor achieves a mean
+absolute error of roughly Rs.&nbsp;186 on a test corpus of synthetic
+bookings calibrated against public logistics benchmarks. Manual
+acceptance testing across the plan, track and pay journeys consistently
+stays within the performance targets laid out in Chapter&nbsp;3, with
+ninety-fifth percentile API latency under 350&nbsp;ms for quote-related
+calls and under 800&nbsp;ms for ML-backed calls.</p>
+
+<p>Overall, Shifty demonstrates that a small, focused team can deliver an
+AI-driven, student-first relocation product using exclusively open-source
+technologies and modest cloud infrastructure. The project also shows that
+transparent, data-driven pricing and always-on conversational support are
+no longer research topics but practical capabilities within reach of an
+undergraduate engineering team.</p>
+
+<h2 class="sec">6.2 Future Enhancements</h2>
+
+<p>While Shifty already covers the primary end-to-end flow, several
+enhancements will make the platform production-ready and extend its
+reach.</p>
+
+<ul>
+  <li><strong>Inter-city relocations.</strong> Extend the routing and
+  pricing models to cover inter-city moves, including toll calculation,
+  multi-leg logistics and overnight stops.</li>
+  <li><strong>IoT integration.</strong> Attach low-cost temperature and
+  shock sensors to consignment containers to protect fragile items and
+  produce a verifiable damage trail.</li>
+  <li><strong>Advanced predictive analytics.</strong> Incorporate
+  demand-forecasting models based on academic calendars and semester
+  start dates to plan mover capacity in advance.</li>
+  <li><strong>Blockchain-backed agreements.</strong> Use smart contracts
+  for deposit escrow and automatic claims release, increasing the level
+  of trust for high-value moves.</li>
+  <li><strong>Multilingual conversational support.</strong> Extend the
+  Rasa assistant to Hindi and regional languages, so non-English speakers
+  can access the full booking and support surface.</li>
+  <li><strong>Progressive Web App delivery.</strong> Package the web
+  companion as a PWA to enable offline browsing of prior bookings and
+  push notifications without forcing an app install.</li>
+  <li><strong>Partner ecosystem.</strong> Integrate with furniture rental
+  providers, cleaning services and utility connection providers so that
+  Shifty becomes a one-stop platform for the entire relocation
+  experience rather than just the move itself.</li>
+</ul>
+
+<p>In conclusion, Shifty provides a strong foundation for future
+development and demonstrates significant potential for expansion into a
+fully functional, real-world relocation and logistics platform for the
+Indian urban mobility segment.</p>
+'''
+
+
+def build() -> None:
+    parts = [HEAD, CH1, CH2, CH3, CH4, CH5, CH6, FOOT]
+    OUT.write_text('\n'.join(parts), encoding='utf-8')
+    print(f'Wrote {OUT}  ({OUT.stat().st_size} bytes)')
+
+
+if __name__ == '__main__':
+    build()

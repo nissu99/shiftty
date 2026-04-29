@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Shifty — Front Matter</title>
+<style>
+@page { size: A4; margin: 25mm 25mm 22mm 25mm; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Times New Roman', 'Liberation Serif', serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000;
+  text-align: justify;
+}
+
+.page { page-break-after: always; }
+.page:last-child { page-break-after: auto; }
+
+/* ---------- Title page ---------- */
+.title-page { text-align: center; }
+.title-page .label {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #000;
+  padding-bottom: 10pt;
+  margin-bottom: 14pt;
+}
+.title-page h1.project-title {
+  font-size: 18pt;
+  font-weight: bold;
+  text-align: center;
+  margin: 14pt 0 14pt 0;
+  border-bottom: 1px solid #000;
+  padding-bottom: 14pt;
+  line-height: 1.3;
+}
+.title-page .fulfil {
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 18pt 0 14pt 0;
+}
+.title-page .degree {
+  font-size: 13pt;
+  font-weight: bold;
+  line-height: 1.8;
+  margin-bottom: 14pt;
+}
+.title-page .submitted-by {
+  font-style: italic;
+  margin: 10pt 0 8pt 0;
+}
+.title-page table.team {
+  margin: 0 auto 18pt auto;
+  border-collapse: collapse;
+}
+.title-page table.team th, .title-page table.team td {
+  border: 1px solid #000;
+  padding: 5pt 22pt;
+  font-size: 12pt;
+  text-align: center;
+}
+.title-page table.team th { font-weight: bold; }
+.title-page .guide { margin: 14pt 0 4pt 0; }
+.title-page .guide-name { font-style: italic; margin: 4pt 0; }
+.title-page .designation { font-style: italic; margin: 4pt 0 10pt 0; }
+.title-page .group-no { margin: 4pt 0 14pt 0; }
+.title-page .logo {
+  width: 70pt;
+  margin: 8pt auto 10pt auto;
+  display: block;
+}
+.title-page .dept {
+  font-size: 13pt;
+  font-weight: bold;
+  margin: 16pt 0 6pt 0;
+}
+.title-page .univ {
+  font-size: 13pt;
+  font-weight: bold;
+  margin: 6pt 0;
+}
+
+/* ---------- Generic page heading (centered bold 14pt) ---------- */
+h1.page-title {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 22pt 0;
+}
+
+/* ---------- Declaration, Ack, Abstract body ---------- */
+p { margin: 0 0 10pt 0; text-align: justify; line-height: 1.5; }
+
+/* ---------- Signatory block ---------- */
+.sign-block { margin-top: 30pt; }
+.sign-block p { text-align: center; margin: 2pt 0; }
+
+/* ---------- TOC / List tables ---------- */
+table.toc {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6pt;
+  font-size: 12pt;
+}
+table.toc th, table.toc td {
+  border: 1px solid #000;
+  padding: 6pt 10pt;
+  vertical-align: middle;
+}
+table.toc th { background: #e8e8e8; text-align: center; font-weight: bold; }
+table.toc td.chap { text-align: center; font-weight: bold; width: 18%; }
+table.toc td.sub  { text-align: center; width: 18%; }
+table.toc td.title { text-align: left; font-weight: bold; }
+table.toc td.subtitle { text-align: left; }
+
+/* ---------- List of Tables/Figures/Abbreviations ---------- */
+table.list {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6pt;
+  font-size: 12pt;
+}
+table.list th, table.list td {
+  border: 1px solid #000;
+  padding: 8pt 10pt;
+}
+table.list th { text-align: center; font-weight: bold; background: #e8e8e8; }
+table.list td.num { text-align: left; width: 30%; font-weight: bold; }
+
+/* ---------- Abbreviations layout ---------- */
+table.abbr td.abbr-key { font-weight: bold; width: 30%; }
+
+/* ---------- Front-matter page numbering notes ---------- */
+.pagenum-note { font-size: 10pt; color: #666; }
+
+/* ---------- Section intro paragraph ---------- */
+p.intro { text-indent: 0.2in; }
+
+/* ---------- Bold inline ---------- */
+strong { font-weight: bold; }
+em { font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1 class="page-title">REFERENCES</h1>
+  <p>[1] Breiman, L. &ldquo;Random Forests.&rdquo; <em>Machine Learning</em>, vol. 45, no. 1, pp. 5&ndash;32, 2001.</p>
+  <p>[2] Chen, T. and Guestrin, C. &ldquo;XGBoost: A Scalable Tree Boosting System.&rdquo;
+  <em>Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge
+  Discovery and Data Mining</em>, pp. 785&ndash;794, 2016.</p>
+  <p>[3] Devlin, J., Chang, M.-W., Lee, K., and Toutanova, K. &ldquo;BERT: Pre-training
+  of Deep Bidirectional Transformers for Language Understanding.&rdquo;
+  <em>arXiv preprint arXiv:1810.04805</em>, 2018.</p>
+  <p>[4] Bocklisch, T., Faulkner, J., Pawlowski, N., and Nichol, A. &ldquo;Rasa:
+  Open Source Language Understanding and Dialogue Management.&rdquo;
+  <em>arXiv preprint arXiv:1712.05181</em>, 2017.</p>
+  <p>[5] Jones, M. B., Bradley, J., and Sakimura, N. &ldquo;JSON Web Token (JWT).&rdquo;
+  <em>RFC 7519</em>, Internet Engineering Task Force, 2015.</p>
+  <p>[6] Provos, N. and Mazi&egrave;res, D. &ldquo;A Future-Adaptable Password Scheme.&rdquo;
+  <em>Proceedings of the USENIX Annual Technical Conference</em>, pp. 81&ndash;92, 1999.</p>
+  <p>[7] Razorpay Software Pvt. Ltd. &ldquo;Razorpay Payment Gateway Integration Guide.&rdquo;
+  <em>https://razorpay.com/docs/</em>, accessed March 2026.</p>
+  <p>[8] Mongoose ODM. &ldquo;Mongoose: Elegant MongoDB Object Modeling for Node.js.&rdquo;
+  <em>https://mongoosejs.com/</em>, accessed March 2026.</p>
+  <p>[9] Meta Platforms, Inc. &ldquo;React Native &ndash; Learn Once, Write Anywhere.&rdquo;
+  <em>https://reactnative.dev/</em>, accessed March 2026.</p>
+  <p>[10] Socket.io Contributors. &ldquo;Socket.IO: Bidirectional and Low-Latency
+  Communication for Every Platform.&rdquo; <em>https://socket.io/docs/</em>, accessed
+  March 2026.</p>
+  <p>[11] Pedregosa, F. et al. &ldquo;Scikit-learn: Machine Learning in Python.&rdquo;
+  <em>Journal of Machine Learning Research</em>, vol. 12, pp. 2825&ndash;2830, 2011.</p>
+  <p>[12] Kumar, A. and Sharma, R. &ldquo;Dynamic Pricing Strategies in On-Demand
+  Service Platforms: A Survey.&rdquo; <em>International Journal of Logistics Management</em>,
+  vol. 32, no. 4, pp. 1213&ndash;1234, 2021.</p>
+  <p>[13] Singh, P. and Verma, S. &ldquo;Adoption of AI-Driven Chatbots in the
+  Indian Logistics Sector.&rdquo; <em>Journal of Emerging Technologies in Business</em>,
+  vol. 8, no. 2, pp. 45&ndash;61, 2022.</p>
+</div>
+
+</body>
+</html>

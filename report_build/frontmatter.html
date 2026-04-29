@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Shifty — Front Matter</title>
+<style>
+@page { size: A4; margin: 25mm 25mm 22mm 25mm; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Times New Roman', 'Liberation Serif', serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000;
+  text-align: justify;
+}
+
+.page { page-break-after: always; }
+.page:last-child { page-break-after: auto; }
+
+/* ---------- Title page ---------- */
+.title-page { text-align: center; }
+.title-page .label {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1px solid #000;
+  padding-bottom: 10pt;
+  margin-bottom: 14pt;
+}
+.title-page h1.project-title {
+  font-size: 18pt;
+  font-weight: bold;
+  text-align: center;
+  margin: 14pt 0 14pt 0;
+  border-bottom: 1px solid #000;
+  padding-bottom: 14pt;
+  line-height: 1.3;
+}
+.title-page .fulfil {
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 18pt 0 14pt 0;
+}
+.title-page .degree {
+  font-size: 13pt;
+  font-weight: bold;
+  line-height: 1.8;
+  margin-bottom: 14pt;
+}
+.title-page .submitted-by {
+  font-style: italic;
+  margin: 10pt 0 8pt 0;
+}
+.title-page table.team {
+  margin: 0 auto 18pt auto;
+  border-collapse: collapse;
+}
+.title-page table.team th, .title-page table.team td {
+  border: 1px solid #000;
+  padding: 5pt 22pt;
+  font-size: 12pt;
+  text-align: center;
+}
+.title-page table.team th { font-weight: bold; }
+.title-page .guide { margin: 14pt 0 4pt 0; }
+.title-page .guide-name { font-style: italic; margin: 4pt 0; }
+.title-page .designation { font-style: italic; margin: 4pt 0 10pt 0; }
+.title-page .group-no { margin: 4pt 0 14pt 0; }
+.title-page .logo {
+  width: 70pt;
+  margin: 8pt auto 10pt auto;
+  display: block;
+}
+.title-page .dept {
+  font-size: 13pt;
+  font-weight: bold;
+  margin: 16pt 0 6pt 0;
+}
+.title-page .univ {
+  font-size: 13pt;
+  font-weight: bold;
+  margin: 6pt 0;
+}
+
+/* ---------- Generic page heading (centered bold 14pt) ---------- */
+h1.page-title {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  margin: 0 0 22pt 0;
+}
+
+/* ---------- Declaration, Ack, Abstract body ---------- */
+p { margin: 0 0 10pt 0; text-align: justify; line-height: 1.5; }
+
+/* ---------- Signatory block ---------- */
+.sign-block { margin-top: 30pt; }
+.sign-block p { text-align: center; margin: 2pt 0; }
+
+/* ---------- TOC / List tables ---------- */
+table.toc {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6pt;
+  font-size: 12pt;
+}
+table.toc th, table.toc td {
+  border: 1px solid #000;
+  padding: 6pt 10pt;
+  vertical-align: middle;
+}
+table.toc th { background: #e8e8e8; text-align: center; font-weight: bold; }
+table.toc td.chap { text-align: center; font-weight: bold; width: 18%; }
+table.toc td.sub  { text-align: center; width: 18%; }
+table.toc td.title { text-align: left; font-weight: bold; }
+table.toc td.subtitle { text-align: left; }
+
+/* ---------- List of Tables/Figures/Abbreviations ---------- */
+table.list {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6pt;
+  font-size: 12pt;
+}
+table.list th, table.list td {
+  border: 1px solid #000;
+  padding: 8pt 10pt;
+}
+table.list th { text-align: center; font-weight: bold; background: #e8e8e8; }
+table.list td.num { text-align: left; width: 30%; font-weight: bold; }
+
+/* ---------- Abbreviations layout ---------- */
+table.abbr td.abbr-key { font-weight: bold; width: 30%; }
+
+/* ---------- Front-matter page numbering notes ---------- */
+.pagenum-note { font-size: 10pt; color: #666; }
+
+/* ---------- Section intro paragraph ---------- */
+p.intro { text-indent: 0.2in; }
+
+/* ---------- Bold inline ---------- */
+strong { font-weight: bold; }
+em { font-style: italic; }
+</style>
+</head>
+<body>
+
+
+<div class="page title-page">
+  <div class="label">PROJECT REPORT</div>
+  <h1 class="project-title">SHIFTY: YOUR ROOM SHIFTING SOLUTION<br/>
+    <span style="font-size: 14pt; font-weight: normal;">AN AI-POWERED PERSONAL RELOCATION PLATFORM</span>
+  </h1>
+  <p class="fulfil">Submitted in partial fulfilment of the requirement for the award of the degree of</p>
+  <div class="degree">
+    BACHELOR OF TECHNOLOGY<br/>
+    IN<br/>
+    COMPUTER SCIENCE &amp; ENGINEERING
+  </div>
+  <div class="submitted-by"><em>Submitted by</em></div>
+  <table class="team">
+    <tr><th>NAMES</th><th>UNIVERSITY ROLL NO.</th></tr>
+    <tr><td>Animesh Rawat</td><td>2218355</td></tr>
+    <tr><td>Mubasherah Anwar</td><td>2219113</td></tr>
+    <tr><td>Tushar Goel</td><td>2219833</td></tr>
+    <tr><td>Vishal Parjapati</td><td>2219937</td></tr>
+  </table>
+  <div class="guide">Under the guidance of</div>
+  <div class="guide-name"><em>Mr. Deepak Upadhayay</em></div>
+  <div class="designation"><em>Assistant Professor</em></div>
+  <div class="group-no"><strong>Project Group No: 307</strong></div>
+  <div class="dept">Department of Computer Science and Engineering</div>
+  <div class="univ">Graphic Era Hill University</div>
+  <div class="univ">May, 2026</div>
+</div>
+
+
+<div class="page">
+  <h1 class="page-title">CANDIDATE&rsquo;S DECLARATION</h1>
+  <p>We hereby certify that the work which is being presented in the project
+  report entitled <strong>&ldquo;SHIFTY: Your Room Shifting Solution &ndash; An AI-Powered
+  Personal Relocation Platform&rdquo;</strong> in partial fulfilment of the requirements
+  for the award of the Degree of Bachelor of Technology in Computer Science and
+  Engineering in the Department of Computer Science and Engineering of the Graphic
+  Era Hill University, Dehradun, shall be carried out by the undersigned under
+  the supervision of <strong>Mr. Deepak Upadhayay, Assistant Professor</strong>,
+  Department of Computer Science and Engineering, Graphic Era Hill University,
+  Dehradun.</p>
+
+  <div class="sign-block">
+    <p>Animesh Rawat (2218355)</p>
+    <p>Mubasherah Anwar (2219113)</p>
+    <p>Tushar Goel (2219833)</p>
+    <p>Vishal Parjapati (2219937)</p>
+  </div>
+
+  <p style="margin-top: 24pt;">This project has been developed under the
+  guidance and supervision of the undersigned faculty guide on the topic
+  <strong>&ldquo;SHIFTY: Your Room Shifting Solution&rdquo;</strong>.</p>
+
+  <div style="margin-top: 30pt; display: flex; justify-content: space-between;">
+    <div>
+      <p style="text-align:left;"><strong>Guide:</strong></p>
+      <p style="text-align:left;">Mr. Deepak Upadhayay</p>
+      <p style="text-align:left;">Date</p>
+      <p style="text-align:left;">Place</p>
+    </div>
+    <div style="text-align:right;">
+      <p style="text-align:right;"><strong>Head of the Department</strong></p>
+    </div>
+  </div>
+</div>
+
+
+<div class="page">
+  <h1 class="page-title">ACKNOWLEDGEMENT</h1>
+  <p>We would like to express our sincere gratitude to our project guide
+  <strong>Mr. Deepak Upadhayay</strong>, Assistant Professor, Department of
+  Computer Science &amp; Engineering, for his invaluable guidance, continuous
+  support, and encouragement throughout the development of this project
+  <strong>&ldquo;SHIFTY: Your Room Shifting Solution.&rdquo;</strong> We are also
+  deeply thankful to the Department of Computer Science &amp; Engineering,
+  Graphic Era Hill University, Dehradun, for providing us with the necessary
+  infrastructure, resources, and academic environment required to successfully
+  complete this work.</p>
+
+  <p>Our heartfelt thanks go to our family and friends for their constant
+  motivation, support, and encouragement throughout the project journey.</p>
+
+  <div style="margin-top: 120pt;">
+    <table style="width:100%; border:0;">
+      <tr>
+        <td style="text-align:left; border:0;"><strong>Animesh Rawat</strong><br/>Roll no. 2218355</td>
+        <td style="text-align:right; border:0;"><strong>Mubasherah Anwar</strong><br/>Roll no. 2219113</td>
+      </tr>
+      <tr><td colspan="2" style="border:0; height: 20pt;"></td></tr>
+      <tr>
+        <td style="text-align:left; border:0;"><strong>Tushar Goel</strong><br/>Roll no. 2219833</td>
+        <td style="text-align:right; border:0;"><strong>Vishal Parjapati</strong><br/>Roll no. 2219937</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+<div class="page">
+  <h1 class="page-title">ABSTRACT</h1>
+  <p>The logistics of residential relocation, even for small-scale moves, are
+  fraught with inefficiencies, opaque pricing structures, and a lack of
+  personalised customer service. The process is often manual, time-consuming,
+  and stressful for the user. This project, titled <strong>SHIFTY</strong>,
+  presents a comprehensive mobile application designed to streamline and
+  revolutionise the room-shifting experience by leveraging the power of
+  Machine Learning (ML) and Artificial Intelligence (AI).</p>
+
+  <p>The core of SHIFTY is a data-driven approach to logistics. The
+  application begins by systematically collecting user inventory data,
+  allowing users to catalogue their belongings and specify items that require
+  special handling such as delicate or heavy objects. This data serves as the
+  input for a suite of intelligent modules. An ML-based recommendation engine
+  analyses the inventory size, item types, and fragility to suggest an
+  optimised service package including appropriate vehicle size, required
+  manpower, and necessary packing materials. Concurrently, a dynamic pricing
+  and offer system, also powered by an ML algorithm, calculates a transparent,
+  fair, and real-time quote based on variables such as distance, inventory
+  volume, item fragility, time of booking, and local demand.</p>
+
+  <p>To enhance user experience and provide round-the-clock support, an
+  integrated AI chatbot assists users with navigation, answers queries, and
+  facilitates the booking process. The frontend interface offers real-time
+  system insights, including booking status, live tracking of consignments,
+  and notification of delivery milestones. Authentication and access control
+  mechanisms are implemented to restrict unauthorised access to sensitive
+  user data.</p>
+
+  <p>This report provides a holistic overview of the project lifecycle, from
+  initial ideation and requirement analysis to system architecture, detailed
+  implementation of the core ML models, deployment strategies, and evaluation.
+  It documents the design and development of the platform, showcasing how
+  AI-driven features create a seamless, efficient, and trustworthy solution
+  for the modern urban mover.</p>
+</div>
+
+
+<div class="page">
+  <h1 class="page-title">TABLE OF CONTENTS</h1>
+  <table class="toc">
+    <thead>
+      <tr><th>Chapter No.</th><th>Section</th><th>Title</th><th>Page</th></tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="3" class="title">ACKNOWLEDGEMENT</td><td style="text-align:center;">i</td></tr>
+<tr><td colspan="3" class="title">ABSTRACT</td><td style="text-align:center;">ii</td></tr>
+<tr><td colspan="3" class="title">TABLE OF CONTENTS</td><td style="text-align:center;">iii</td></tr>
+<tr><td colspan="3" class="title">LIST OF TABLES</td><td style="text-align:center;">v</td></tr>
+<tr><td colspan="3" class="title">LIST OF FIGURES</td><td style="text-align:center;">vi</td></tr>
+<tr><td colspan="3" class="title">ABBREVIATIONS</td><td style="text-align:center;">vii</td></tr>
+<tr><td colspan="3" class="title">NOTATIONS</td><td style="text-align:center;">viii</td></tr>
+<tr><td class="chap">1</td><td></td><td class="title">Introduction</td><td style="text-align:center;">1</td></tr>
+<tr><td></td><td class="sub">1.1</td><td class="subtitle">Background and Motivation</td><td style="text-align:center;">1</td></tr>
+<tr><td></td><td class="sub">1.2</td><td class="subtitle">Problem Statement</td><td style="text-align:center;">2</td></tr>
+<tr><td></td><td class="sub">1.3</td><td class="subtitle">Objectives of the Project</td><td style="text-align:center;">3</td></tr>
+<tr><td></td><td class="sub">1.4</td><td class="subtitle">Organization of the Report</td><td style="text-align:center;">4</td></tr>
+<tr><td class="chap">2</td><td></td><td class="title">Literature Review</td><td style="text-align:center;">5</td></tr>
+<tr><td></td><td class="sub">2.1</td><td class="subtitle">Traditional Packers and Movers Systems</td><td style="text-align:center;">5</td></tr>
+<tr><td></td><td class="sub">2.2</td><td class="subtitle">Web and Mobile-Based Booking Platforms</td><td style="text-align:center;">6</td></tr>
+<tr><td></td><td class="sub">2.3</td><td class="subtitle">Machine Learning in Logistics</td><td style="text-align:center;">6</td></tr>
+<tr><td></td><td class="sub">2.4</td><td class="subtitle">Dynamic Pricing in Service Platforms</td><td style="text-align:center;">8</td></tr>
+<tr><td></td><td class="sub">2.5</td><td class="subtitle">Real-Time Tracking and Location Systems</td><td style="text-align:center;">8</td></tr>
+<tr><td></td><td class="sub">2.6</td><td class="subtitle">Conversational AI for Service Booking</td><td style="text-align:center;">9</td></tr>
+<tr><td></td><td class="sub">2.7</td><td class="subtitle">Comparative Study of Moving Service Approaches</td><td style="text-align:center;">9</td></tr>
+<tr><td></td><td class="sub">2.8</td><td class="subtitle">Conclusion of Literature Review</td><td style="text-align:center;">10</td></tr>
+<tr><td class="chap">3</td><td></td><td class="title">System Requirements and Analysis</td><td style="text-align:center;">11</td></tr>
+<tr><td></td><td class="sub">3.1</td><td class="subtitle">Overview</td><td style="text-align:center;">11</td></tr>
+<tr><td></td><td class="sub">3.2</td><td class="subtitle">Purpose</td><td style="text-align:center;">11</td></tr>
+<tr><td></td><td class="sub">3.3</td><td class="subtitle">Hardware Requirements</td><td style="text-align:center;">11</td></tr>
+<tr><td></td><td class="sub">3.4</td><td class="subtitle">Software Requirements</td><td style="text-align:center;">12</td></tr>
+<tr><td></td><td class="sub">3.5</td><td class="subtitle">Functional Requirements</td><td style="text-align:center;">13</td></tr>
+<tr><td></td><td class="sub">3.6</td><td class="subtitle">Non-Functional Requirements</td><td style="text-align:center;">14</td></tr>
+<tr><td></td><td class="sub">3.7</td><td class="subtitle">Feasibility Study</td><td style="text-align:center;">15</td></tr>
+<tr><td></td><td class="sub">3.8</td><td class="subtitle">System Analysis Summary</td><td style="text-align:center;">16</td></tr>
+<tr><td class="chap">4</td><td></td><td class="title">System Design and Architecture</td><td style="text-align:center;">17</td></tr>
+<tr><td></td><td class="sub">4.1</td><td class="subtitle">Overview</td><td style="text-align:center;">17</td></tr>
+<tr><td></td><td class="sub">4.2</td><td class="subtitle">System Architecture</td><td style="text-align:center;">17</td></tr>
+<tr><td></td><td class="sub">4.3</td><td class="subtitle">Components and Modules</td><td style="text-align:center;">18</td></tr>
+<tr><td></td><td class="sub">4.4</td><td class="subtitle">System Design Workflow</td><td style="text-align:center;">19</td></tr>
+<tr><td></td><td class="sub">4.5</td><td class="subtitle">Flow Diagram</td><td style="text-align:center;">19</td></tr>
+<tr><td></td><td class="sub">4.6</td><td class="subtitle">Design Considerations</td><td style="text-align:center;">20</td></tr>
+<tr><td></td><td class="sub">4.7</td><td class="subtitle">Database Schema Design</td><td style="text-align:center;">21</td></tr>
+<tr><td></td><td class="sub">4.8</td><td class="subtitle">Workflow of Shifty System</td><td style="text-align:center;">22</td></tr>
+<tr><td class="chap">5</td><td></td><td class="title">Implementation</td><td style="text-align:center;">23</td></tr>
+<tr><td></td><td class="sub">5.1</td><td class="subtitle">Overview</td><td style="text-align:center;">23</td></tr>
+<tr><td></td><td class="sub">5.2</td><td class="subtitle">Software Stack</td><td style="text-align:center;">23</td></tr>
+<tr><td></td><td class="sub">5.3</td><td class="subtitle">System Implementation</td><td style="text-align:center;">24</td></tr>
+<tr><td></td><td class="sub">5.4</td><td class="subtitle">Algorithm Implementation</td><td style="text-align:center;">25</td></tr>
+<tr><td></td><td class="sub">5.5</td><td class="subtitle">System Flow Control</td><td style="text-align:center;">26</td></tr>
+<tr><td></td><td class="sub">5.6</td><td class="subtitle">Performance and Optimization</td><td style="text-align:center;">26</td></tr>
+<tr><td></td><td class="sub">5.7</td><td class="subtitle">Testing and Validation</td><td style="text-align:center;">27</td></tr>
+<tr><td></td><td class="sub">5.8</td><td class="subtitle">Software Setup and Code Integration</td><td style="text-align:center;">28</td></tr>
+<tr><td></td><td class="sub">5.9</td><td class="subtitle">Real-Time System Monitoring and Dashboard Output</td><td style="text-align:center;">28</td></tr>
+<tr><td class="chap">6</td><td></td><td class="title">Conclusion and Future Scope</td><td style="text-align:center;">30</td></tr>
+<tr><td></td><td class="sub">6.1</td><td class="subtitle">Conclusion</td><td style="text-align:center;">30</td></tr>
+<tr><td></td><td class="sub">6.2</td><td class="subtitle">Future Enhancements</td><td style="text-align:center;">31</td></tr>
+<tr><td colspan="3" class="title">APPENDIX</td><td style="text-align:center;">33</td></tr>
+<tr><td colspan="3" class="title">REFERENCES</td><td style="text-align:center;">61</td></tr>
+
+    </tbody>
+  </table>
+</div>
+
+
+<div class="page">
+  <h1 class="page-title">LIST OF TABLES</h1>
+  <table class="list">
+    <thead>
+      <tr><th style="width:30%;">Table No.</th><th>Title</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="num">Table 1</td><td>Comparison of Traditional vs. AI-based Moving Platforms</td></tr>
+      <tr><td class="num">Table 2</td><td>Functional Requirements of SHIFTY System</td></tr>
+      <tr><td class="num">Table 3</td><td>Non-Functional Requirements of SHIFTY System</td></tr>
+      <tr><td class="num">Table 4</td><td>Module-wise Implementation Status</td></tr>
+      <tr><td class="num">Table 5</td><td>Testing and Validation Summary</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="page">
+  <h1 class="page-title">LIST OF FIGURES</h1>
+  <table class="list">
+    <thead>
+      <tr><th style="width:30%;">Figure No.</th><th>Title</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="num">Figure 1</td><td>Pain-point Fishbone Diagram of Traditional Relocation Experience</td></tr>
+      <tr><td class="num">Figure 2</td><td>SHIFTY Target Audience and Their Needs</td></tr>
+      <tr><td class="num">Figure 3</td><td>High-level System Architecture of SHIFTY</td></tr>
+      <tr><td class="num">Figure 4</td><td>Entity-Relationship Diagram of the SHIFTY Database</td></tr>
+      <tr><td class="num">Figure 5</td><td>UML Use-case Diagram of SHIFTY Platform</td></tr>
+      <tr><td class="num">Figure 6</td><td>Data Flow of the AI-Powered Package Recommender</td></tr>
+      <tr><td class="num">Figure 7</td><td>Dynamic Pricing Pipeline using XGBoost</td></tr>
+      <tr><td class="num">Figure 8</td><td>Conversational Assistant Interaction Flow</td></tr>
+      <tr><td class="num">Figure 9</td><td>Live Tracking Socket Architecture</td></tr>
+      <tr><td class="num">Figure 10</td><td>Payment Subsystem Sequence Diagram</td></tr>
+      <tr><td class="num">Figure 11</td><td>Module-wise Completion Progress Chart</td></tr>
+      <tr><td class="num">Figure 12</td><td>Landing Page of the Shifty Web Prototype</td></tr>
+      <tr><td class="num">Figure 13</td><td>Booking Planner Capturing Itinerary and Inventory</td></tr>
+      <tr><td class="num">Figure 14</td><td>Price Prediction Screen Showing Model-Generated Quote</td></tr>
+      <tr><td class="num">Figure 15</td><td>Payment Review Screen Prior to Gateway Hand-off</td></tr>
+      <tr><td class="num">Figure 16</td><td>Sign-in Screen for Secure Access in Shifty System</td></tr>
+      <tr><td class="num">Figure 17</td><td>Account Creation Screen with Inline Validation</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="page">
+  <h1 class="page-title">ABBREVIATIONS</h1>
+  <table class="list abbr">
+    <thead>
+      <tr><th style="width:30%;">Abbreviation</th><th>Full Form</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="abbr-key">AI</td><td>Artificial Intelligence</td></tr>
+      <tr><td class="abbr-key">ML</td><td>Machine Learning</td></tr>
+      <tr><td class="abbr-key">NLP</td><td>Natural Language Processing</td></tr>
+      <tr><td class="abbr-key">API</td><td>Application Programming Interface</td></tr>
+      <tr><td class="abbr-key">REST</td><td>Representational State Transfer</td></tr>
+      <tr><td class="abbr-key">UI</td><td>User Interface</td></tr>
+      <tr><td class="abbr-key">UX</td><td>User Experience</td></tr>
+      <tr><td class="abbr-key">SPA</td><td>Single Page Application</td></tr>
+      <tr><td class="abbr-key">JWT</td><td>JSON Web Token</td></tr>
+      <tr><td class="abbr-key">JSON</td><td>JavaScript Object Notation</td></tr>
+      <tr><td class="abbr-key">HTTP</td><td>Hyper Text Transfer Protocol</td></tr>
+      <tr><td class="abbr-key">HTTPS</td><td>Hyper Text Transfer Protocol Secure</td></tr>
+      <tr><td class="abbr-key">DB</td><td>Database</td></tr>
+      <tr><td class="abbr-key">SQL</td><td>Structured Query Language</td></tr>
+      <tr><td class="abbr-key">NoSQL</td><td>Not Only SQL</td></tr>
+      <tr><td class="abbr-key">CRUD</td><td>Create, Read, Update, Delete</td></tr>
+      <tr><td class="abbr-key">GPS</td><td>Global Positioning System</td></tr>
+      <tr><td class="abbr-key">RF</td><td>Random Forest</td></tr>
+      <tr><td class="abbr-key">XGB</td><td>Extreme Gradient Boosting</td></tr>
+      <tr><td class="abbr-key">MAE</td><td>Mean Absolute Error</td></tr>
+      <tr><td class="abbr-key">SDK</td><td>Software Development Kit</td></tr>
+      <tr><td class="abbr-key">OS</td><td>Operating System</td></tr>
+      <tr><td class="abbr-key">CI/CD</td><td>Continuous Integration / Continuous Deployment</td></tr>
+      <tr><td class="abbr-key">CLI</td><td>Command Line Interface</td></tr>
+      <tr><td class="abbr-key">IDE</td><td>Integrated Development Environment</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="page">
+  <h1 class="page-title">NOTATIONS</h1>
+  <table class="list">
+    <thead>
+      <tr><th style="width:30%;">Symbol</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="abbr-key">D<sub>km</sub></td><td>Source-to-destination distance in kilometres</td></tr>
+      <tr><td class="abbr-key">V<sub>inv</sub></td><td>Total inventory volume</td></tr>
+      <tr><td class="abbr-key">N<sub>frag</sub></td><td>Count of fragile items in the inventory</td></tr>
+      <tr><td class="abbr-key">P<sub>final</sub></td><td>Final predicted price for a booking</td></tr>
+      <tr><td class="abbr-key">P<sub>pack</sub></td><td>Recommended service package (Basic | Standard | Premium)</td></tr>
+      <tr><td class="abbr-key">T<sub>move</sub></td><td>Scheduled move date and time</td></tr>
+      <tr><td class="abbr-key">&alpha;</td><td>Demand-surge multiplier</td></tr>
+      <tr><td class="abbr-key">&beta;</td><td>Fragility penalty weight</td></tr>
+      <tr><td class="abbr-key">&lambda;</td><td>Regularisation coefficient of the XGBoost model</td></tr>
+      <tr><td class="abbr-key">Q<sub>user</sub></td><td>Natural-language query from the customer</td></tr>
+      <tr><td class="abbr-key">R<sub>bot</sub></td><td>Response generated by the AI chatbot</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+</body>
+</html>

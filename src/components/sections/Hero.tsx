@@ -1,12 +1,5 @@
-import { ArrowRight, CreditCard, Sparkles, Zap, Shield, Clock } from "lucide-react";
+import { ArrowRight, CreditCard, Sparkles, Zap, Shield, Clock, TrendingUp } from "lucide-react";
 import Link from "next/link";
-
-const stats = [
-  { label: "Avg. move time", value: "5 hrs", icon: Clock },
-  { label: "Campus coverage", value: "18 km²", icon: Zap },
-  { label: "Verified movers", value: "42", icon: Shield },
-  { label: "Success score", value: "4.9★", icon: Sparkles },
-];
 
 export function HeroSection() {
   return (
@@ -53,6 +46,12 @@ export function HeroSection() {
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
+                href="/match"
+                className="inline-flex items-center gap-2.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-7 py-3.5 font-semibold text-emerald-200 transition-all hover:bg-emerald-500/20"
+              >
+                Match hostel + mover
+              </Link>
+              <Link
                 href="/payments"
                 className="inline-flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.04] px-7 py-3.5 font-semibold text-white/80 transition-all hover:border-white/20 hover:bg-white/[0.08]"
               >
@@ -62,23 +61,57 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Bento stat cards */}
-          <div className="grid w-full max-w-xs grid-cols-2 gap-3">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="glass glow-emerald group rounded-2xl p-5 transition-all hover:-translate-y-1"
-              >
-                <stat.icon
-                  size={18}
-                  className="text-emerald-400 transition-colors group-hover:text-emerald-300"
-                />
-                <p className="mt-3 text-2xl font-bold text-white">{stat.value}</p>
+          {/* Bento stat cards — asymmetric layout */}
+          <div className="grid w-full max-w-sm grid-cols-6 gap-3">
+            {/* Hero stat — spans 2 rows */}
+            <div className="glass glow-emerald group col-span-4 row-span-2 flex flex-col justify-between rounded-2xl p-5 transition-all hover:-translate-y-1">
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10">
+                  <TrendingUp size={18} className="text-emerald-400" />
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-emerald-400/80">
+                  live
+                </span>
+              </div>
+              <div>
+                <p className="text-5xl font-bold text-white">4.9<span className="text-2xl text-amber-400">★</span></p>
                 <p className="mt-1 text-[11px] uppercase tracking-wider text-white/40">
-                  {stat.label}
+                  Semester rating · 312 reviews
                 </p>
               </div>
-            ))}
+            </div>
+
+            {/* Coverage */}
+            <div className="glass group col-span-2 flex items-center gap-2 rounded-2xl p-4 transition-all hover:-translate-y-1">
+              <Zap size={16} className="text-emerald-400 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-lg font-bold text-white">18<span className="text-xs text-white/50">km²</span></p>
+                <p className="text-[10px] uppercase tracking-wider text-white/40">coverage</p>
+              </div>
+            </div>
+
+            {/* Movers */}
+            <div className="glass group col-span-2 flex items-center gap-2 rounded-2xl p-4 transition-all hover:-translate-y-1">
+              <Shield size={16} className="text-violet-400 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-lg font-bold text-white">42</p>
+                <p className="text-[10px] uppercase tracking-wider text-white/40">movers</p>
+              </div>
+            </div>
+
+            {/* Avg time — full width strip */}
+            <div className="glass col-span-6 flex items-center justify-between rounded-2xl p-4 transition-all hover:-translate-y-1">
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                  <Clock size={14} className="text-amber-400" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-white">5 hrs avg. move</p>
+                  <p className="text-[10px] uppercase tracking-wider text-white/40">pickup to drop</p>
+                </div>
+              </div>
+              <span className="pulse-glow h-2 w-2 rounded-full bg-emerald-400" />
+            </div>
           </div>
         </div>
       </div>
